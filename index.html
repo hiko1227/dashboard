@@ -79,32 +79,40 @@
         .forecast-container { margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
         .forecast-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; }
 
-        .embedded-frame-container {
-            width: 100%;
-            height: 220px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #111827;
-            border: 1px solid rgba(255,255,255,0.1);
+        /* 快捷大按鈕專區 */
+        .transport-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
             margin-top: 6px;
         }
-        .embedded-frame-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .direct-link-btn {
-            display: inline-block;
-            background: rgba(255,255,255,0.1);
-            color: var(--accent-blue);
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.85rem;
+        .transport-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 18px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-main);
+            transition: all 0.2s ease;
         }
-        .direct-link-btn:hover { background: rgba(255,255,255,0.2); }
+        .transport-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+        .transport-info .title { font-size: 1.2rem; font-weight: 700; color: var(--accent-blue); }
+        .transport-info .desc { font-size: 0.95rem; color: #9ca3af; margin-top: 2px; }
+        .transport-action {
+            background: var(--accent-blue);
+            color: #0b0f19;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
 
         .memo-input-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .memo-input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; color: #fff; font-size: 1.15rem; outline: none; }
@@ -172,29 +180,28 @@
             </div>
         </div>
 
-        <!-- 右邊欄：交通實況 -->
+        <!-- 右邊欄：交通實況極速專屬捷徑 -->
         <div>
-            <!-- 港鐵恆安站 -->
             <div class="panel">
-                <div class="panel-title">
-                    <span>🚇 港鐵恆安站 (屯馬綫)</span>
-                    <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="direct-link-btn">官網 ↗</a>
-                </div>
-                <div class="embedded-frame-container">
-                    <!-- 港鐵主頁/下一班車查詢嵌入 -->
-                    <iframe src="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" style="background:#fff;"></iframe>
-                </div>
-            </div>
+                <div class="panel-title"><span>🚇 交通實況快捷通道</span></div>
+                <div class="transport-btn-grid">
+                    <!-- 港鐵恆安站 -->
+                    <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="transport-card">
+                        <div class="transport-info">
+                            <div class="title">🚇 港鐵恆安站 (屯馬綫)</div>
+                            <div class="desc">查看下一班車到站時間</div>
+                        </div>
+                        <div class="transport-action">開啟 ↗</div>
+                    </a>
 
-            <!-- 巴士站 (錦鞍苑 / 欣安邨) -->
-            <div class="panel">
-                <div class="panel-title">
-                    <span>🚌 九巴實時 (錦鞍苑 / 欣安邨)</span>
-                    <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴搜尋 ↗</a>
-                </div>
-                <div class="embedded-frame-container">
-                    <!-- 使用九巴官方公開搜尋頁面取代無效API網址 -->
-                    <iframe src="https://search.kmb.hk/" style="background:#fff;"></iframe>
+                    <!-- 九巴實時 / 搜尋 -->
+                    <a href="https://search.kmb.hk/" target="_blank" class="transport-card">
+                        <div class="transport-info">
+                            <div class="title">🚌 九巴實時搜尋</div>
+                            <div class="desc">適用於錦鞍苑 / 欣安邨等站點</div>
+                        </div>
+                        <div class="transport-action">查詢 ↗</div>
+                    </a>
                 </div>
             </div>
 
