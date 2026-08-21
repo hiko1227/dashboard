@@ -58,25 +58,15 @@
             flex-shrink: 0;
         }
         .moon-shadow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 50%;
-            transition: transform 0.5s ease;
-            transform-origin: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); border-radius: 50%;
+            transition: transform 0.5s ease; transform-origin: center;
         }
 
         .main-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 8px; max-width: 1200px; margin: auto; }
         .panel { 
-            background: var(--card-bg); 
-            padding: 12px 16px; 
-            border-radius: 14px; 
-            border: 1px solid rgba(255,255,255,0.08); 
-            backdrop-filter: blur(10px);
-            margin-bottom: 8px;
+            background: var(--card-bg); padding: 12px 16px; border-radius: 14px; 
+            border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); margin-bottom: 8px;
         }
         .panel-title { 
             font-size: 1.2rem; color: var(--accent-green); font-weight: 700; margin-bottom: 10px; 
@@ -93,7 +83,6 @@
         .mtr-up { border-left: 6px solid var(--accent-blue); }
         .mtr-down { border-left: 6px solid var(--accent-purple); }
         .bus-normal { border-left: 6px solid var(--accent-green); }
-        .bus-special { border-left: 6px solid var(--accent-orange); background: rgba(245, 158, 11, 0.12); }
         
         .time-val { color: var(--accent-green); font-size: 1.05rem; font-weight: 800; text-align: right; }
         .sub-note { font-size: 0.85rem; color: #9ca3af; font-weight: normal; display: block; }
@@ -119,12 +108,10 @@
             <span class="date-part" id="date-part">--</span>
             <span class="weekday-part" id="weekday-part">--</span>
         </div>
-
         <div class="header-center">
             <span class="clock" id="clock">00:00:00</span>
             <span class="ampm" id="ampm">--</span>
         </div>
-
         <div class="header-right">
             <div class="realistic-moon" title="即時月相">
                 <div class="moon-shadow" id="moon-shadow"></div>
@@ -156,12 +143,10 @@
                     <span>📝 雲端備忘錄</span>
                     <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
                 </div>
-
                 <div class="memo-input-box">
                     <input type="text" id="memo-input" class="memo-input" placeholder="輸入備忘..." onkeypress="if(event.key==='Enter')addMemo()">
                     <button class="memo-btn" onclick="addMemo()">新增</button>
                 </div>
-
                 <div class="memo-list" id="memo-list">
                     <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">正在連接雲端...</div>
                 </div>
@@ -170,38 +155,33 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵面板 (固定 2 個方向) -->
+            <!-- 港鐵面板：恆安站 -->
             <div class="panel">
                 <div class="panel-title">🚇 港鐵恆安站 (屯馬綫)</div>
                 
                 <div class="transport-row mtr-down">
-                    <div>往 烏溪沙<span class="sub-note">實時預報</span></div>
+                    <div>往 烏溪沙<span class="sub-note">自動更新</span></div>
                     <span class="time-val" id="mtr-down">連線中...</span>
                 </div>
 
                 <div class="transport-row mtr-up">
-                    <div>往 屯門 / 大圍方向<span class="sub-note">實時預報</span></div>
+                    <div>往 屯門方向<span class="sub-note">自動更新</span></div>
                     <span class="time-val" id="mtr-up">連線中...</span>
                 </div>
             </div>
 
-            <!-- 巴士面板 (固定選定嘅 2-3 架巴士/站) -->
+            <!-- 巴士面板：2個指定站 -->
             <div class="panel">
                 <div class="panel-title">🚌 實時巴士到站</div>
                 
                 <div class="transport-row bus-normal">
-                    <div>錦鞍苑 - 89C (往觀塘)<span class="sub-note">九巴實時</span></div>
+                    <div>錦鞍苑 - 89C (往觀塘)<span class="sub-note">自動更新</span></div>
                     <span class="time-val" id="bus-1">連線中...</span>
                 </div>
 
                 <div class="transport-row bus-normal" style="border-left-color: #38bdf8;">
-                    <div>欣安邨 - 89C (往觀塘)<span class="sub-note">九巴實時</span></div>
+                    <div>欣安邨 - 89C (往觀塘)<span class="sub-note">自動更新</span></div>
                     <span class="time-val" id="bus-2">連線中...</span>
-                </div>
-
-                <div class="transport-row bus-special">
-                    <div>🔥 錦鞍苑 - 89C [特別班次]<span class="sub-note">九巴實時</span></div>
-                    <span class="time-val" style="color: var(--accent-orange);" id="bus-3">連線中...</span>
                 </div>
             </div>
 
@@ -227,13 +207,11 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
+            hours = hours % 12; hours = hours ? hours : 12;
             const hoursStr = String(hours).padStart(2, '0');
 
             document.getElementById('clock').textContent = `${hoursStr}:${minutes}:${seconds}`;
             document.getElementById('ampm').textContent = ampm;
-
             document.getElementById('date-part').textContent = now.toLocaleDateString('zh-HK', {month:'long', day:'numeric'});
             document.getElementById('weekday-part').textContent = now.toLocaleDateString('zh-HK', {weekday:'long'});
 
@@ -242,7 +220,6 @@
                 const lunar = solar.getLunar();
                 const lunarDay = lunar.getDay();
                 let shadowTransform = 'translateX(0%)';
-
                 if (lunarDay === 1) shadowTransform = 'translateX(0%)';
                 else if (lunarDay > 1 && lunarDay < 7) shadowTransform = 'translateX(35%)';
                 else if (lunarDay === 7 || lunarDay === 8) shadowTransform = 'translateX(50%)';
@@ -251,7 +228,6 @@
                 else if (lunarDay > 16 && lunarDay < 22) shadowTransform = 'translateX(-75%)';
                 else if (lunarDay === 22 || lunarDay === 23) shadowTransform = 'translateX(-50%)';
                 else shadowTransform = 'translateX(-35%)';
-
                 document.getElementById('moon-shadow').style.transform = shadowTransform;
             } catch (e) {}
         }
@@ -260,7 +236,6 @@
             const today = new Date();
             const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
             const random = (s) => { let x = Math.sin(s) * 10000; return x - Math.floor(x); };
-
             const levels = ['⭐⭐⭐ 平穩', '⭐⭐⭐⭐ 順遂', '⭐⭐⭐⭐⭐ 極佳', '⭐⭐⭐ 沉澱', '⭐⭐⭐⭐ 突破'];
             const aspects = [
                 '今日適合專注處理細節，寫作靈感可能會喺獨處時湧現，不妨將點滴記錄低。',
@@ -270,7 +245,6 @@
                 '可能會接觸到一啲懷舊嘅人事物或舊有興趣，為你帶嚟意想不到嘅啟發。'
             ];
             const colors = ['深藍色 (沉穩)', '大地色 (踏實)', '銀灰色 (理性)', '暗紅色 (內斂)', '黑色 (專注)'];
-
             document.getElementById('horoscope-content').innerHTML = `
                 <div style="display: flex; gap: 12px; margin-bottom: 8px; margin-top: 4px;">
                     <div>運勢：<span style="color: var(--accent-yellow); font-weight: bold;">${levels[Math.floor(random(seed) * levels.length)]}</span></div>
@@ -280,20 +254,24 @@
             `;
         }
 
-        // 輕量化 MTR 查詢（使用支援 JSONP / 跨域友善嘅方法）
+        // 使用穩定中轉 Proxy 抓取港鐵數據，確保自動更新唔會被 CORS 封鎖
         async function fetchMTR() {
             try {
-                const res = await fetch('https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET');
-                const data = await res.json();
+                const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+                const res = await fetch(proxyUrl);
+                const json = await res.json();
+                if (!json.contents) throw new Error();
+                const data = JSON.parse(json.contents);
+
                 if (data && data.status === 1 && data.data && data.data['TML-HET']) {
                     const het = data.data['TML-HET'];
                     parseMTR(het.DOWN, 'mtr-down');
                     parseMTR(het.UP, 'mtr-up');
                 }
             } catch (e) {
-                // 如果直接 fetch 失敗，自動切換備用直接連結提示
-                document.getElementById('mtr-down').textContent = '查看實時';
-                document.getElementById('mtr-up').textContent = '查看實時';
+                document.getElementById('mtr-down').textContent = '更新中...';
+                document.getElementById('mtr-up').textContent = '更新中...';
             }
         }
 
@@ -333,34 +311,37 @@
             }
         }
 
-        // 九巴指定站點實時（錦鞍苑 003348、欣安邨 003662）
+        // 使用穩定中轉 Proxy 抓取九巴數據（錦鞍苑 003348、欣安邨 003662）
         async function fetchBusETA() {
             try {
                 // 1. 錦鞍苑 89C
-                const r1 = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003348');
-                const d1 = await r1.json();
-                if (d1?.data) {
-                    let etas = d1.data.filter(e => e.route === '89C' && e.dir === 'O' && !e.service_type);
-                    etas.sort((a,b) => new Date(a.eta) - new Date(b.eta));
-                    document.getElementById('bus-1').textContent = etas.length > 0 ? formatEtaTime(etas[0].eta) : '暫無班次';
-                    
-                    let special = d1.data.filter(e => e.route === '89C' && e.service_type > 1);
-                    special.sort((a,b) => new Date(a.eta) - new Date(b.eta));
-                    document.getElementById('bus-3').textContent = special.length > 0 ? formatEtaTime(special[0].eta) : '非服務時間';
+                const url1 = 'https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003348';
+                const r1 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url1)}`);
+                const j1 = await r1.json();
+                if (j1.contents) {
+                    const d1 = JSON.parse(j1.contents);
+                    if (d1?.data) {
+                        let etas = d1.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        etas.sort((a,b) => new Date(a.eta) - new Date(b.eta));
+                        document.getElementById('bus-1').textContent = etas.length > 0 ? formatEtaTime(etas[0].eta) : '暫無班次';
+                    }
                 }
 
                 // 2. 欣安邨 89C
-                const r2 = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003662');
-                const d2 = await r2.json();
-                if (d2?.data) {
-                    let etas2 = d2.data.filter(e => e.route === '89C' && e.dir === 'O');
-                    etas2.sort((a,b) => new Date(a.eta) - new Date(b.eta));
-                    document.getElementById('bus-2').textContent = etas2.length > 0 ? formatEtaTime(etas2[0].eta) : '暫無班次';
+                const url2 = 'https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003662';
+                const r2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url2)}`);
+                const j2 = await r2.json();
+                if (j2.contents) {
+                    const d2 = JSON.parse(j2.contents);
+                    if (d2?.data) {
+                        let etas2 = d2.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        etas2.sort((a,b) => new Date(a.eta) - new Date(b.eta));
+                        document.getElementById('bus-2').textContent = etas2.length > 0 ? formatEtaTime(etas2[0].eta) : '暫無班次';
+                    }
                 }
             } catch (e) {
-                document.getElementById('bus-1').textContent = '連線中';
-                document.getElementById('bus-2').textContent = '連線中';
-                document.getElementById('bus-3').textContent = '連線中';
+                document.getElementById('bus-1').textContent = '更新中...';
+                document.getElementById('bus-2').textContent = '更新中...';
             }
         }
 
@@ -442,6 +423,7 @@
             await saveMemosToCloud(memos);
         }
 
+        // 自動定時更新（每 30 秒自動抓取最新數據，完全唔使手動 refresh）
         setInterval(updateTime, 1000);
         setInterval(fetchWeather, 600000); 
         setInterval(fetchBusETA, 30000); 
