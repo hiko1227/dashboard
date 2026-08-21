@@ -59,7 +59,7 @@
         }
         .moon-shadow {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); border-radius: 50%;
+            background: rgba(0, 0, 0, 0.9); border-radius: 50%;
             transition: transform 0.5s ease; transform-origin: center;
         }
 
@@ -81,9 +81,9 @@
             display: inline-block;
             background: rgba(255,255,255,0.1);
             color: var(--accent-blue);
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             text-decoration: none;
             border: 1px solid rgba(255,255,255,0.15);
         }
@@ -100,14 +100,13 @@
         .memo-action-btn:hover { background: rgba(255,255,255,0.2); }
         .memo-delete { color: #f87171; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; padding: 2px 4px; }
         
-        .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+        .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
 
-        /* 交通 API 專用樣式 */
         .transit-container {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            max-height: 260px;
+            gap: 8px;
+            max-height: 300px;
             overflow-y: auto;
             margin-top: 6px;
         }
@@ -115,17 +114,17 @@
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
         .route-badge {
-            font-size: 1.05rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: var(--accent-yellow);
             background: rgba(251, 191, 36, 0.15);
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 6px;
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
@@ -137,20 +136,20 @@
         .transit-input {
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.15);
-            padding: 6px 10px;
+            padding: 8px 10px;
             border-radius: 6px;
             color: #fff;
-            font-size: 0.9rem;
+            font-size: 1.05rem;
             outline: none;
         }
         .transit-add-btn {
             background: var(--accent-blue);
             color: #0b0f19;
             border: none;
-            padding: 0 12px;
+            padding: 0 14px;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1.05rem;
             cursor: pointer;
             white-space: nowrap;
         }
@@ -185,7 +184,7 @@
                         <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 52px; height: 52px; display: none;" onerror="this.style.display='none'">
                         <span class="wx-temp" id="current-temp">--°C</span>
                     </div>
-                    <div style="text-align: right; font-size: 1.05rem; font-weight: 600;">
+                    <div style="text-align: right; font-size: 1.1rem; font-weight: 600;">
                         <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
                         <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
                     </div>
@@ -203,36 +202,36 @@
                     <button class="memo-btn" onclick="addMemo()">新增</button>
                 </div>
                 <div class="memo-list" id="memo-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">正在連接雲端...</div>
+                    <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1.1rem;">正在連接雲端...</div>
                 </div>
             </div>
         </div>
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵恆安站 API 實時面板 (已移除標題文字) -->
-            <div class="panel">
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
-                    <button class="refresh-memo-btn" onclick="fetchMTR()">🔄 更新港鐵</button>
-                </div>
-                <div class="transit-container" id="mtr-eta-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 15px;">載入港鐵實時資料中...</div>
-                </div>
-            </div>
-
-            <!-- 九巴實時 ETA 面板 (已移除標題文字) -->
+            <!-- 九巴實時 ETA 面板 -->
             <div class="panel">
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
                     <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴網 ↗</a>
                 </div>
                 <div class="transit-input-box">
-                    <input type="text" id="bus-route-input" class="transit-input" style="width: 65px; text-align: center;" placeholder="路線">
-                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
+                    <input type="text" id="bus-route-input" class="transit-input" style="width: 70px; text-align: center;" placeholder="路線">
+                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 85px; text-align: center;" placeholder="站ID" value="003345">
                     <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱 (例: 返工/返屋企)">
                     <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
                 </div>
                 <div class="transit-container" id="bus-eta-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 15px;">載入九巴資料中...</div>
+                    <div style="color: #9ca3af; text-align: center; padding: 15px; font-size: 1.1rem;">載入九巴資料中...</div>
+                </div>
+            </div>
+
+            <!-- 港鐵恆安站 API 實時面板 -->
+            <div class="panel">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
+                    <button class="refresh-memo-btn" onclick="fetchMTR()">🔄 更新港鐵</button>
+                </div>
+                <div class="transit-container" id="mtr-eta-list">
+                    <div style="color: #9ca3af; text-align: center; padding: 15px; font-size: 1.1rem;">載入港鐵實時資料中...</div>
                 </div>
             </div>
         </div>
@@ -263,13 +262,15 @@
                 const lunar = solar.getLunar();
                 const lunarDay = lunar.getDay();
                 
-                // 更準確之月相陰影對應 (農曆初一至三十)
-                let shadowTransform = 'translateX(0%)';
-                const ratio = (lunarDay - 1) / 29;
-                let translateVal = (ratio * 200) - 100; 
-                shadowTransform = `translateX(${translateVal}%)`;
+                // 更精準之月相陰影對應 (農曆初一至三十)
+                let translateVal = 0;
+                if (lunarDay <= 15) {
+                    translateVal = -((lunarDay - 1) / 14) * 100;
+                } else {
+                    translateVal = 100 - ((lunarDay - 16) / 14) * 100;
+                }
                 
-                document.getElementById('moon-shadow').style.transform = shadowTransform;
+                document.getElementById('moon-shadow').style.transform = `translateX(${translateVal}%)`;
             } catch (e) {}
         }
 
@@ -312,7 +313,7 @@
                 if (json.status === 1 && json.data) {
                     const stationData = json.data['TML-HEO'];
                     if (!stationData) {
-                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">暫無列車資料</div>';
+                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">暫無列車資料</div>';
                         return;
                     }
 
@@ -322,8 +323,8 @@
 
                     let html = '';
                     const renderGroup = (trains, title) => {
-                        if (trains.length === 0) return `<div style="font-size:0.9rem; color:#9ca3af; margin-bottom:4px;">${title}：暫無班次</div>`;
-                        let resHtml = `<div style="font-size:0.85rem; color:var(--accent-blue); font-weight:bold; margin-bottom:3px;">${title}</div>`;
+                        if (trains.length === 0) return `<div style="font-size:1.05rem; color:#9ca3af; margin-bottom:6px;">${title}：暫無班次</div>`;
+                        let resHtml = `<div style="font-size:1.05rem; color:var(--accent-blue); font-weight:bold; margin-bottom:4px;">${title}</div>`;
                         resHtml += trains.slice(0, 2).map(t => {
                             const destName = destMap[t.dest] || t.dest;
                             const trainTime = new Date(t.time.replace(/-/g, '/'));
@@ -335,23 +336,24 @@
 
                             const timeText = diffMin <= 0 ? `即將到達 (${clockTime})` : `${diffMin} 分鐘 (${clockTime})`;
                             return `
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 8px; border-radius: 6px; margin-bottom: 3px; font-size: 0.95rem;">
-                                    <span>往 <b>${destName}</b> <span style="font-size:0.8rem; color:#9ca3af;">(月台 ${t.plat})</span></span>
-                                    <span style="color: var(--accent-green); font-weight: bold; font-size: 0.9rem;">${timeText}</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 1.1rem;">
+                                    <span>往 <b>${destName}</b> <span style="font-size:0.95rem; color:#9ca3af;">(月台 ${t.plat})</span></span>
+                                    <span style="color: var(--accent-green); font-weight: bold;">${timeText}</span>
                                 </div>
                             `;
                         }).join('');
                         return resHtml;
                     };
 
-                    html += renderGroup(upTrains, '方向一 (市區 / 屯門方向)');
-                    html += renderGroup(downTrains, '方向二 (烏溪沙方向)');
+                    html += renderGroup(upTrains, '市區 / 屯門方向');
+                    html += `<div style="margin-top: 8px;"></div>`;
+                    html += renderGroup(downTrains, '烏溪沙方向');
                     container.innerHTML = html;
                 } else {
-                    container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px;">港鐵系統維護中</div>';
+                    container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px; font-size: 1.1rem;">港鐵系統維護中</div>';
                 }
             } catch (e) {
-                container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px;">港鐵連線失敗</div>';
+                container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px; font-size: 1.1rem;">港鐵連線失敗</div>';
             }
         }
 
@@ -372,7 +374,7 @@
             const routes = getStoredBusRoutes();
 
             if (routes.length === 0) {
-                container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">請於上方新增你想查詢嘅九巴路線</div>';
+                container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">請於上方新增你想查詢嘅九巴路線</div>';
                 return;
             }
 
@@ -399,51 +401,50 @@
                                 const mins = String(nextTime.getMinutes()).padStart(2, '0');
                                 const clockTime = `${hours}:${mins}`;
 
-                                const rmk = e.rmk_tc ? `<span style="color: var(--accent-orange); font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); padding: 1px 4px; border-radius: 4px; margin-left: 4px; font-weight: bold;">${e.rmk_tc}</span>` : '';
+                                const rmk = e.rmk_tc ? `<span style="color: var(--accent-orange); font-size: 0.9rem; background: rgba(245, 158, 11, 0.2); padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold;">${e.rmk_tc}</span>` : '';
                                 const label = idx === 0 ? '首班' : `後${idx}`;
 
                                 return `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-top: 3px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 3px;">
-                                        <span style="color: #9ca3af; font-size: 0.85rem;">${label}: <strong style="color: var(--accent-green);">${timeStr}</strong> <span style="font-size: 0.8rem;">(${clockTime})</span></span>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+                                        <span style="color: #9ca3af;">${label}: <strong style="color: var(--accent-green); font-size: 1.1rem;">${timeStr}</strong> <span style="font-size: 0.95rem;">(${clockTime})</span></span>
                                         ${rmk}
                                     </div>
                                 `;
                             }).join('');
                         } else {
-                            etasListHtml = '<div style="color: #9ca3af; font-size: 0.9rem; margin-top: 4px;">暫無班次</div>';
+                            etasListHtml = '<div style="color: #9ca3af; font-size: 1.05rem; margin-top: 6px;">暫無班次</div>';
                         }
                     } else {
-                        etasListHtml = '<div style="color: #9ca3af; font-size: 0.9rem; margin-top: 4px;">暫無班次</div>';
+                        etasListHtml = '<div style="color: #9ca3af; font-size: 1.05rem; margin-top: 6px;">暫無班次</div>';
                     }
 
-                    // 路線、車站、自訂名稱放同一行
                     htmlContent += `
                         <div class="transit-card">
                             <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                     <span class="route-badge">${r.route}</span>
-                                    <span style="font-size: 0.85rem; color: #9ca3af;">(${r.stop})</span>
-                                    ${r.name ? `<span style="font-size: 1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
+                                    <span style="font-size: 0.95rem; color: #9ca3af;">(${r.stop})</span>
+                                    ${r.name ? `<span style="font-size: 1.15rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                                 </div>
-                                <div style="margin-top: 2px;">
+                                <div style="margin-top: 4px;">
                                     ${etasListHtml}
                                 </div>
                             </div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem; padding: 4px; margin-left: 6px;">✕</button>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.3rem; padding: 4px; margin-left: 8px;">✕</button>
                         </div>
                     `;
                 } catch (err) {
                     htmlContent += `
                         <div class="transit-card">
                             <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                     <span class="route-badge">${r.route}</span>
-                                    <span style="font-size: 0.85rem; color: #9ca3af;">(${r.stop})</span>
-                                    ${r.name ? `<span style="font-size: 1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
+                                    <span style="font-size: 0.95rem; color: #9ca3af;">(${r.stop})</span>
+                                    ${r.name ? `<span style="font-size: 1.15rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                                 </div>
-                                <div style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">讀取失敗</div>
+                                <div style="color: #f87171; font-size: 1.05rem; margin-top: 6px;">讀取失敗</div>
                             </div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.3rem;">✕</button>
                         </div>
                     `;
                 }
@@ -505,7 +506,7 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1.1rem;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
