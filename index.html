@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Dashboard</title>
+    <title>星空個人 Dashboard</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -150,14 +150,6 @@
                 </div>
             </div>
 
-            <!-- 星象面板 (新增) -->
-            <div class="panel">
-                <div class="panel-title"><span>♑ 摩羯座 (Capricorn) 每日運勢</span></div>
-                <div id="horoscope-content" style="font-size: 1.05rem; padding-top: 4px; line-height: 1.5;">
-                    計算中...
-                </div>
-            </div>
-
             <!-- 備忘錄面板 -->
             <div class="panel">
                 <div class="panel-title">
@@ -217,6 +209,14 @@
                     <span class="time-val" id="hin-89c">連線中...</span>
                 </div>
             </div>
+
+            <!-- 星象面板 (移到右邊) -->
+            <div class="panel">
+                <div class="panel-title"><span>♑ 摩羯座 (Capricorn) 每日運勢</span></div>
+                <div id="horoscope-content" style="font-size: 1.05rem; padding-top: 4px; line-height: 1.5;">
+                    計算中...
+                </div>
+            </div>
         </div>
     </div>
 
@@ -261,10 +261,8 @@
             } catch (e) {}
         }
 
-        // 摩羯座每日星象 (本地演算，確保每日穩定更新不依賴API)
         function updateHoroscope() {
             const today = new Date();
-            // 以年月日作為隨機種子，確保同一日內重新整理結果不變
             const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
             
             const random = (s) => {
@@ -295,20 +293,20 @@
             `;
         }
 
-        // 直接連線港鐵 API (移除 Proxy)
+        // 地鐵 API (已修復: MOS 轉為最新嘅 TML 屯馬綫)
         async function fetchMTR() {
             try {
-                const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=MOS&sta=HET';
+                const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
                 const res = await fetch(targetUrl);
                 const data = await res.json();
 
-                if (data && data.status === 1 && data.data && data.data['HET']) {
-                    const hetData = data.data['HET'];
+                if (data && data.status === 1 && data.data && data.data['TML-HET']) {
+                    const hetData = data.data['TML-HET'];
                     parseMTRDirection(hetData.UP, 'mtr-up');
                     parseMTRDirection(hetData.DOWN, 'mtr-down');
                 } else {
-                    document.getElementById('mtr-up').textContent = '暫無資料';
-                    document.getElementById('mtr-down').textContent = '暫無資料';
+                    document.getElementById('mtr-up').textContent = '暫無班次';
+                    document.getElementById('mtr-down').textContent = '暫無班次';
                 }
             } catch (e) {
                 document.getElementById('mtr-up').textContent = '暫時無法連接';
@@ -373,20 +371,46 @@
             }
         }
 
-        // 直接連線九巴 API (移除 Proxy)
+        // 智能尋找車站 ID
+        let targetStopIds = { kamOn: null, yanOn: null };
+
+        // 巴士 API (已修復: 重新架構 API 抓取邏輯，動態配對正確車站 ID)
         async function fetchBusETA() {
             try {
-                const targetUrl = 'https://data.etabus.gov.hk/v1/transport/kmb/eta/route/89C';
-                const res = await fetch(targetUrl);
-                const data = await res.json();
+                if (!targetStopIds.kamOn || !targetStopIds.yanOn) {
+                    document.getElementById('k-89c').textContent = '搜尋車站中...';
+                    document.getElementById('hin-89c').textContent = '搜尋車站中...';
+                    
+                    const stopsRes = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop');
+                    const stopsData = await stopsRes.json();
+                    
+                    if (stopsData && stopsData.data) {
+                        const kamOnStop = stopsData.data.find(s => s.name_tc.includes('錦鞍苑'));
+                        const yanOnStop = stopsData.data.find(s => s.name_tc.includes('欣安邨'));
+                        
+                        if (kamOnStop) targetStopIds.kamOn = kamOnStop.stop;
+                        if (yanOnStop) targetStopIds.yanOn = yanOnStop.stop;
+                    }
+                }
 
-                if (data && data.data) {
-                    const etas = data.data;
-                    let kamOnEtas = etas.filter(e => e.stop === "MA321" && e.dir === "O");
-                    let yanOnEtas = etas.filter(e => e.stop === "MA140" && e.dir === "O");
-
-                    formatAndDisplayETA(kamOnEtas, 'k-89c', 'k-special');
-                    formatAndDisplayETA(yanOnEtas, 'hin-89c', 'hin-special');
+                // 獲取錦鞍苑數據
+                if (targetStopIds.kamOn) {
+                    const res1 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${targetStopIds.kamOn}`);
+                    const data1 = await res1.json();
+                    if (data1 && data1.data) {
+                        let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        formatAndDisplayETA(etas, 'k-89c', 'k-special');
+                    }
+                }
+                
+                // 獲取欣安邨數據
+                if (targetStopIds.yanOn) {
+                    const res2 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${targetStopIds.yanOn}`);
+                    const data2 = await res2.json();
+                    if (data2 && data2.data) {
+                        let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
+                    }
                 }
             } catch (e) {
                 document.getElementById('k-89c').textContent = '暫時無法連接';
@@ -407,7 +431,8 @@
             stationEtas.forEach(eta => {
                 let timeStr = formatArrivalTime(eta.eta);
                 if (timeStr) {
-                    if (eta.rmk_tc && (eta.rmk_tc.includes('特別') || eta.rmk_tc.includes('特快'))) {
+                    // 特別班次通常 service_type 會大過 1，或者 rmk_tc 會標記特別
+                    if (eta.service_type > 1 || (eta.rmk_tc && eta.rmk_tc.includes('特別'))) {
                         specialList.push(timeStr);
                     } else {
                         normalList.push(timeStr);
@@ -415,7 +440,7 @@
                 }
             });
 
-            document.getElementById(normalId).textContent = normalList.length > 0 ? normalList.join(', ') : '--';
+            document.getElementById(normalId).textContent = normalList.length > 0 ? normalList.join(', ') : '暫無班次';
             document.getElementById(specialId).textContent = specialList.length > 0 ? specialList.join(', ') : '非服務時間';
         }
 
@@ -516,7 +541,7 @@
         setInterval(loadMemosFromCloud, 30000); 
 
         updateTime(); 
-        updateHoroscope(); // 初始化星座運勢
+        updateHoroscope();
         fetchWeather();
         fetchBusETA();
         fetchMTR();
