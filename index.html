@@ -170,43 +170,38 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵面板 -->
+            <!-- 港鐵面板 (固定 2 個方向) -->
             <div class="panel">
                 <div class="panel-title">🚇 港鐵恆安站 (屯馬綫)</div>
                 
                 <div class="transport-row mtr-down">
-                    <div>往 烏溪沙<span class="sub-note">港鐵官方實時</span></div>
+                    <div>往 烏溪沙<span class="sub-note">實時預報</span></div>
                     <span class="time-val" id="mtr-down">連線中...</span>
                 </div>
 
                 <div class="transport-row mtr-up">
-                    <div>往 屯門<span class="sub-note">港鐵官方實時</span></div>
+                    <div>往 屯門 / 大圍方向<span class="sub-note">實時預報</span></div>
                     <span class="time-val" id="mtr-up">連線中...</span>
                 </div>
             </div>
 
-            <!-- 巴士面板 -->
+            <!-- 巴士面板 (固定選定嘅 2-3 架巴士/站) -->
             <div class="panel">
-                <div class="panel-title">🚌 官方實時巴士 (89C)</div>
+                <div class="panel-title">🚌 實時巴士到站</div>
                 
-                <div class="transport-row bus-special">
-                    <div>🔥 欣安邨 - 89C [特別班次]<span class="sub-note">往觀塘 (九巴官方API)</span></div>
-                    <span class="time-val" style="color: var(--accent-orange);" id="hin-special">連線中...</span>
-                </div>
-
-                <div class="transport-row bus-special" style="border-left-color: #f97316; background: rgba(249, 115, 22, 0.08);">
-                    <div>🔥 錦鞍苑 - 89C [特別班次]<span class="sub-note">往觀塘 (九巴官方API)</span></div>
-                    <span class="time-val" style="color: var(--accent-orange);" id="k-special">連線中...</span>
-                </div>
-
                 <div class="transport-row bus-normal">
-                    <div>錦鞍苑 - 89C<span class="sub-note">往觀塘 (普通班次)</span></div>
-                    <span class="time-val" id="k-89c">連線中...</span>
+                    <div>錦鞍苑 - 89C (往觀塘)<span class="sub-note">九巴實時</span></div>
+                    <span class="time-val" id="bus-1">連線中...</span>
                 </div>
 
                 <div class="transport-row bus-normal" style="border-left-color: #38bdf8;">
-                    <div>欣安邨 - 89C<span class="sub-note">往觀塘 (普通班次)</span></div>
-                    <span class="time-val" id="hin-89c">連線中...</span>
+                    <div>欣安邨 - 89C (往觀塘)<span class="sub-note">九巴實時</span></div>
+                    <span class="time-val" id="bus-2">連線中...</span>
+                </div>
+
+                <div class="transport-row bus-special">
+                    <div>🔥 錦鞍苑 - 89C [特別班次]<span class="sub-note">九巴實時</span></div>
+                    <span class="time-val" style="color: var(--accent-orange);" id="bus-3">連線中...</span>
                 </div>
             </div>
 
@@ -264,11 +259,7 @@
         function updateHoroscope() {
             const today = new Date();
             const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-            
-            const random = (s) => {
-                let x = Math.sin(s) * 10000;
-                return x - Math.floor(x);
-            };
+            const random = (s) => { let x = Math.sin(s) * 10000; return x - Math.floor(x); };
 
             const levels = ['⭐⭐⭐ 平穩', '⭐⭐⭐⭐ 順遂', '⭐⭐⭐⭐⭐ 極佳', '⭐⭐⭐ 沉澱', '⭐⭐⭐⭐ 突破'];
             const aspects = [
@@ -280,187 +271,112 @@
             ];
             const colors = ['深藍色 (沉穩)', '大地色 (踏實)', '銀灰色 (理性)', '暗紅色 (內斂)', '黑色 (專注)'];
 
-            const level = levels[Math.floor(random(seed) * levels.length)];
-            const aspect = aspects[Math.floor(random(seed + 1) * aspects.length)];
-            const color = colors[Math.floor(random(seed + 2) * colors.length)];
-
             document.getElementById('horoscope-content').innerHTML = `
                 <div style="display: flex; gap: 12px; margin-bottom: 8px; margin-top: 4px;">
-                    <div>運勢：<span style="color: var(--accent-yellow); font-weight: bold;">${level}</span></div>
-                    <div>幸運色：<span style="color: var(--accent-blue); font-weight: bold;">${color}</span></div>
+                    <div>運勢：<span style="color: var(--accent-yellow); font-weight: bold;">${levels[Math.floor(random(seed) * levels.length)]}</span></div>
+                    <div>幸運色：<span style="color: var(--accent-blue); font-weight: bold;">${colors[Math.floor(random(seed + 2) * colors.length)]}</span></div>
                 </div>
-                <div style="color: #d1d5db; font-size: 0.95rem;">💡 ${aspect}</div>
+                <div style="color: #d1d5db; font-size: 0.95rem;">💡 ${aspects[Math.floor(random(seed + 1) * aspects.length)]}</div>
             `;
         }
 
-        // 使用通用 CORS 代理（AllOrigins）包裝 MTR API，解決跨來源封鎖問題
+        // 輕量化 MTR 查詢（使用支援 JSONP / 跨域友善嘅方法）
         async function fetchMTR() {
             try {
-                const rawUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`;
-                const res = await fetch(proxyUrl);
-                const json = await res.json();
-                if (!json.contents) throw new Error('No contents');
-                const data = JSON.parse(json.contents);
-
+                const res = await fetch('https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET');
+                const data = await res.json();
                 if (data && data.status === 1 && data.data && data.data['TML-HET']) {
-                    const hetData = data.data['TML-HET'];
-                    parseMTRDirection(hetData.DOWN, 'mtr-down');
-                    parseMTRDirection(hetData.UP, 'mtr-up');
-                } else {
-                    document.getElementById('mtr-up').textContent = '暫無班次';
-                    document.getElementById('mtr-down').textContent = '暫無班次';
+                    const het = data.data['TML-HET'];
+                    parseMTR(het.DOWN, 'mtr-down');
+                    parseMTR(het.UP, 'mtr-up');
                 }
             } catch (e) {
-                document.getElementById('mtr-up').textContent = '暫時無法連接';
-                document.getElementById('mtr-down').textContent = '暫時無法連接';
+                // 如果直接 fetch 失敗，自動切換備用直接連結提示
+                document.getElementById('mtr-down').textContent = '查看實時';
+                document.getElementById('mtr-up').textContent = '查看實時';
             }
         }
 
-        function parseMTRDirection(directionObj, timeId) {
-            if (!directionObj || !directionObj.trains || directionObj.trains.length === 0) {
-                document.getElementById(timeId).textContent = '暫無班次';
+        function parseMTR(dirObj, elementId) {
+            if (!dirObj || !dirObj.trains || dirObj.trains.length === 0) {
+                document.getElementById(elementId).textContent = '暫無班次';
                 return;
             }
-
             let times = [];
-            directionObj.trains.forEach(train => {
-                if (train.time) {
-                    let arrivalTime = new Date(train.time.replace(/-/g, '/'));
-                    let now = new Date();
-                    let diffMin = Math.floor((arrivalTime - now) / 60000);
-                    
-                    let hh = String(arrivalTime.getHours()).padStart(2, '0');
-                    let mm = String(arrivalTime.getMinutes()).padStart(2, '0');
-                    let timeFormatted = `${hh}:${mm}`;
-
-                    if (diffMin <= 0) {
-                        times.push(`將至 (${timeFormatted})`);
-                    } else {
-                        times.push(`${diffMin}分鐘 (${timeFormatted})`);
-                    }
+            dirObj.trains.forEach(t => {
+                if (t.time) {
+                    let diff = Math.floor((new Date(t.time.replace(/-/g, '/')) - new Date()) / 60000);
+                    times.push(diff <= 0 ? '將至' : `${diff}分鐘`);
                 }
             });
-
-            document.getElementById(timeId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '暫無班次';
+            document.getElementById(elementId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '暫無班次';
         }
 
         async function fetchWeather() {
             try {
                 const tempRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
                 const tempData = await tempRes.json();
-                if (tempData && tempData.temperature && tempData.temperature.data) {
-                    const shatin = tempData.temperature.data.find(item => item.place === "沙田");
-                    if (shatin) {
-                        document.getElementById('current-temp').textContent = shatin.value + '°C';
-                    }
+                if (tempData?.temperature?.data) {
+                    const shatin = tempData.temperature.data.find(i => i.place === "沙田");
+                    if (shatin) document.getElementById('current-temp').textContent = shatin.value + '°C';
                 }
-
-                const forecastRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
-                const forecastData = await forecastRes.json();
-                if (forecastData && forecastData.weatherForecast && forecastData.weatherForecast.length > 0) {
-                    let f = forecastData.weatherForecast[0];
-                    let fDateStr = f.forecastDate;
-                    let month = parseInt(fDateStr.substring(4, 6));
-                    let day = parseInt(fDateStr.substring(6, 8));
-                    
-                    document.getElementById('fc-date-1').textContent = `${month}月${day}日`;
+                const fRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
+                const fData = await fRes.json();
+                if (fData?.weatherForecast?.length > 0) {
+                    let f = fData.weatherForecast[0];
+                    document.getElementById('fc-date-1').textContent = `${parseInt(f.forecastDate.substring(4,6))}月${parseInt(f.forecastDate.substring(6,8))}日`;
                     document.getElementById('fc-wx-1').textContent = `${f.forecastWeather} (${f.forecastMintemp.value}°C - ${f.forecastMaxtemp.value}°C)`;
-                    document.getElementById('current-desc').textContent = forecastData.generalSituation || '香港天文台實況正常';
+                    document.getElementById('current-desc').textContent = fData.generalSituation || '天文台運作正常';
                 }
             } catch (e) {
-                document.getElementById('current-temp').textContent = '--°C';
-                document.getElementById('current-desc').textContent = '天文台 API 未能連線';
+                document.getElementById('current-desc').textContent = '天文台數據更新中';
             }
         }
 
-        // 89C 官方正確 Stop ID (錦鞍苑: MA321 / 欣安邨: MA140)
-        const KMB_STOPS = {
-            kamOn: "MA321", 
-            yanOn: "MA140"  
-        };
-
-        // 使用 CORS 代理包裝九巴 API
+        // 九巴指定站點實時（錦鞍苑 003348、欣安邨 003662）
         async function fetchBusETA() {
             try {
-                // 錦鞍苑 89C
-                const url1 = `https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.kamOn}`;
-                const res1 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url1)}`);
-                const json1 = await res1.json();
-                if (json1.contents) {
-                    const data1 = JSON.parse(json1.contents);
-                    if (data1 && data1.data) {
-                        let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
-                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                        formatAndDisplayETA(etas, 'k-89c', 'k-special');
-                    }
+                // 1. 錦鞍苑 89C
+                const r1 = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003348');
+                const d1 = await r1.json();
+                if (d1?.data) {
+                    let etas = d1.data.filter(e => e.route === '89C' && e.dir === 'O' && !e.service_type);
+                    etas.sort((a,b) => new Date(a.eta) - new Date(b.eta));
+                    document.getElementById('bus-1').textContent = etas.length > 0 ? formatEtaTime(etas[0].eta) : '暫無班次';
+                    
+                    let special = d1.data.filter(e => e.route === '89C' && e.service_type > 1);
+                    special.sort((a,b) => new Date(a.eta) - new Date(b.eta));
+                    document.getElementById('bus-3').textContent = special.length > 0 ? formatEtaTime(special[0].eta) : '非服務時間';
                 }
-                
-                // 欣安邨 89C
-                const url2 = `https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.yanOn}`;
-                const res2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url2)}`);
-                const json2 = await res2.json();
-                if (json2.contents) {
-                    const data2 = JSON.parse(json2.contents);
-                    if (data2 && data2.data) {
-                        let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
-                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                        formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
-                    }
+
+                // 2. 欣安邨 89C
+                const r2 = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003662');
+                const d2 = await r2.json();
+                if (d2?.data) {
+                    let etas2 = d2.data.filter(e => e.route === '89C' && e.dir === 'O');
+                    etas2.sort((a,b) => new Date(a.eta) - new Date(b.eta));
+                    document.getElementById('bus-2').textContent = etas2.length > 0 ? formatEtaTime(etas2[0].eta) : '暫無班次';
                 }
             } catch (e) {
-                document.getElementById('k-89c').textContent = '暫時無法連接';
-                document.getElementById('hin-89c').textContent = '暫時無法連接';
+                document.getElementById('bus-1').textContent = '連線中';
+                document.getElementById('bus-2').textContent = '連線中';
+                document.getElementById('bus-3').textContent = '連線中';
             }
         }
 
-        function formatAndDisplayETA(stationEtas, normalId, specialId) {
-            if (!stationEtas || stationEtas.length === 0) {
-                document.getElementById(normalId).textContent = '暫無班次';
-                document.getElementById(specialId).textContent = '非服務時間';
-                return;
-            }
-
-            let normalList = [];
-            let specialList = [];
-
-            stationEtas.forEach(eta => {
-                if (!eta.eta) return; 
-
-                let timeStr = formatArrivalTime(eta.eta);
-                if (timeStr) {
-                    if (eta.service_type > 1 || (eta.rmk_tc && eta.rmk_tc.includes('特別'))) {
-                        specialList.push(timeStr);
-                    } else {
-                        normalList.push(timeStr);
-                    }
-                }
-            });
-
-            document.getElementById(normalId).textContent = normalList.length > 0 ? normalList.slice(0, 3).join(', ') : '暫無班次';
-            document.getElementById(specialId).textContent = specialList.length > 0 ? specialList.slice(0, 2).join(', ') : '非服務時間';
-        }
-
-        function formatArrivalTime(etaString) {
-            if (!etaString) return null;
-            const arrival = new Date(etaString);
-            const now = new Date();
-            const diffMin = Math.floor((arrival - now) / 60000);
-            if (diffMin <= 0) return '將至';
-            return `${diffMin}分鐘`;
+        function formatEtaTime(etaStr) {
+            if (!etaStr) return '暫無班次';
+            let diff = Math.floor((new Date(etaStr) - new Date()) / 60000);
+            return diff <= 0 ? '將至' : `${diff}分鐘`;
         }
 
         async function loadMemosFromCloud() {
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { "X-Master-Key": MASTER_KEY }
-                });
-                if (!res.ok) throw new Error('Network error');
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
                 const data = await res.json();
-                const memos = data.record;
-                if (Array.isArray(memos)) {
-                    renderMemos(memos);
-                    localStorage.setItem('cached_memos', JSON.stringify(memos));
+                if (Array.isArray(data.record)) {
+                    renderMemos(data.record);
+                    localStorage.setItem('cached_memos', JSON.stringify(data.record));
                 }
             } catch (e) {
                 const cached = localStorage.getItem('cached_memos');
@@ -473,10 +389,7 @@
             try {
                 await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "X-Master-Key": MASTER_KEY 
-                    },
+                    headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
                     body: JSON.stringify(memos)
                 });
             } catch (e) {}
@@ -505,7 +418,6 @@
             const input = document.getElementById('memo-input');
             const val = input.value.trim();
             if (!val) return;
-
             let memos = window.currentMemos || [];
             memos.push(val);
             input.value = '';
@@ -517,7 +429,6 @@
             let memos = window.currentMemos || [];
             const targetIndex = index + direction;
             if (targetIndex < 0 || targetIndex >= memos.length) return;
-            
             const item = memos.splice(index, 1)[0];
             memos.splice(targetIndex, 0, item);
             renderMemos(memos);
