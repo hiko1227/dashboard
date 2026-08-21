@@ -78,22 +78,6 @@
         .wx-temp { font-size: 2.8rem; font-weight: 800; color: var(--accent-yellow); line-height: 1; }
         .forecast-container { margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
         .forecast-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; }
-
-        /* 長駐嵌入畫格樣式 */
-        .embedded-frame-container {
-            width: 100%;
-            height: 220px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #ffffff;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 6px;
-        }
-        .embedded-frame-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
         
         .direct-link-btn {
             display: inline-block;
@@ -120,16 +104,16 @@
         
         .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
 
-        /* 九巴實時 ETA 專用樣式 */
-        .bus-eta-container {
+        /* 交通 API 專用樣式 */
+        .transit-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 220px;
+            gap: 6px;
+            max-height: 230px;
             overflow-y: auto;
             margin-top: 6px;
         }
-        .bus-route-card {
+        .transit-card {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
@@ -138,8 +122,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .bus-route-num {
-            font-size: 1.25rem;
+        .route-badge {
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--accent-yellow);
             background: rgba(251, 191, 36, 0.15);
@@ -147,20 +131,31 @@
             border-radius: 6px;
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
-        .bus-dest {
+        .transit-input-box {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .transit-input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 6px 10px;
+            border-radius: 6px;
+            color: #fff;
             font-size: 0.95rem;
-            color: #d1d5db;
+            outline: none;
         }
-        .bus-times {
-            text-align: right;
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-        .bus-time-sub {
-            font-size: 0.85rem;
-            color: #9ca3af;
-            font-weight: normal;
+        .transit-input.short { width: 70px; text-align: center; }
+        .transit-input.long { flex: 1; }
+        .transit-add-btn {
+            background: var(--accent-blue);
+            color: #0b0f19;
+            border: none;
+            padding: 0 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -218,25 +213,30 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵恆安站嵌入 -->
+            <!-- 港鐵恆安站 API 實時面板 -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚇 港鐵恆安站 (屯馬綫)</span>
-                    <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="direct-link-btn">官網 ↗</a>
+                    <span>🚇 港鐵恆安站 (屯馬綫 API)</span>
+                    <button class="refresh-memo-btn" onclick="fetchMTR()">🔄 更新</button>
                 </div>
-                <div class="embedded-frame-container">
-                    <iframe src="https://www.mtr.com.hk/ch/customer/services/next_train_index.html"></iframe>
+                <div class="transit-container" id="mtr-eta-list">
+                    <div style="color: #9ca3af; text-align: center; padding: 15px;">載入港鐵實時資料中...</div>
                 </div>
             </div>
 
-            <!-- 九巴實時 ETA 面板 (升級為 API 動態實時到站) -->
+            <!-- 九巴實時 ETA 面板 (支援自選路線及站號) -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚌 九巴實時 ETA (錦鞍苑 / 恆安)</span>
-                    <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴 ↗</a>
+                    <span>🚌 九巴實時 ETA (自選管理)</span>
+                    <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴網 ↗</a>
                 </div>
-                <div class="bus-eta-container" id="bus-eta-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 20px;">載入九巴實時資料中...</div>
+                <div class="transit-input-box">
+                    <input type="text" id="bus-route-input" class="transit-input short" placeholder="路線(如85K)">
+                    <input type="text" id="bus-stop-input" class="transit-input long" placeholder="站ID(預設錦鞍苑 003345)" value="003345">
+                    <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
+                </div>
+                <div class="transit-container" id="bus-eta-list">
+                    <div style="color: #9ca3af; text-align: center; padding: 15px;">載入九巴資料中...</div>
                 </div>
             </div>
 
@@ -330,68 +330,146 @@
             }
         }
 
-        // 九巴實時 ETA 抓取邏輯 (以錦鞍苑/恆安附近常用路線為例)
-        async function fetchBusETA() {
-            const container = document.getElementById('bus-eta-list');
-            // 錦鞍苑/恆安常用站點及路線設定
-            // 這裡示範主打幾條熱門路線，透過九巴 open API 抓取
-            const routes = [
-                { route: '85K', bound: 'I', desc: '往 沙田站', stop: '003345' },
-                { route: '89C', bound: 'O', desc: '往 觀塘站', stop: '003345' },
-                { route: '681', bound: 'O', desc: '往 中環', stop: '003345' },
-                { route: '281X', bound: 'O', desc: '往 尖沙咀', stop: '003345' }
-            ];
-
+        // 港鐵 API 抓取 (恆安站 TML-HEO)
+        async function fetchMTR() {
+            const container = document.getElementById('mtr-eta-list');
             try {
-                let htmlContent = '';
-                for (let r of routes) {
-                    try {
-                        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/1`);
-                        const data = await res.json();
-                        const etas = data.data;
-                        
-                        let timeStr = '暫無資料';
-                        let subStr = '';
-                        if (etas && etas.length > 0) {
-                            const validEtas = etas.filter(e => e.eta);
-                            if (validEtas.length > 0) {
-                                const nextTime = new Date(validEtas[0].eta);
-                                const now = new Date();
-                                const diffMin = Math.round((nextTime - now) / 60000);
-                                timeStr = diffMin <= 1 ? '將到達' : `${diffMin} 分鐘`;
-                                
-                                if (validEtas[1]) {
-                                    const secondTime = new Date(validEtas[1].eta);
-                                    const diffMin2 = Math.round((secondTime - now) / 60000);
-                                    subStr = `後續: ${diffMin2 <= 1 ? '將到達' : diffMin2 + '分鐘'}`;
-                                }
-                            }
-                        }
-
-                        htmlContent += `
-                            <div class="bus-route-card">
-                                <div>
-                                    <span class="bus-route-num">${r.route}</span>
-                                    <div class="bus-dest">${r.desc}</div>
-                                </div>
-                                <div class="bus-times">
-                                    <div>${timeStr}</div>
-                                    <div class="bus-time-sub">${subStr}</div>
-                                </div>
-                            </div>
-                        `;
-                    } catch (err) {
-                        // 單條路線失敗略過
+                const res = await fetch('https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HEO');
+                const json = await res.json();
+                if (json.status === 1 && json.data) {
+                    const stationData = json.data['TML-HEO'];
+                    if (!stationData) {
+                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">暫無列車資料</div>';
+                        return;
                     }
-                }
-                if (htmlContent) {
-                    container.innerHTML = htmlContent;
+
+                    const upTrains = stationData.UP || [];
+                    const downTrains = stationData.DOWN || [];
+                    const destMap = { 'WKS': '烏溪沙', 'MOS': '馬鞍山', 'TUM': '屯門', 'HUH': '紅磡', 'ETS': '尖東', 'KAT': '啟德', 'DIH': '鑽石山' };
+
+                    let html = '';
+                    const renderGroup = (trains, title) => {
+                        if (trains.length === 0) return `<div style="font-size:0.9rem; color:#9ca3af; margin-bottom:4px;">${title}：暫無班次</div>`;
+                        let resHtml = `<div style="font-size:0.85rem; color:var(--accent-blue); font-weight:bold; margin-bottom:3px;">${title}</div>`;
+                        resHtml += trains.slice(0, 2).map(t => {
+                            const destName = destMap[t.dest] || t.dest;
+                            const trainTime = new Date(t.time.replace(/-/g, '/'));
+                            const diffMin = Math.round((trainTime - new Date()) / 60000);
+                            const timeText = diffMin <= 0 ? '即將到達' : `${diffMin} 分鐘`;
+                            return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 8px; border-radius: 6px; margin-bottom: 3px; font-size: 0.95rem;">
+                                    <span>往 <b>${destName}</b> (月台 ${t.plat})</span>
+                                    <span style="color: var(--accent-green); font-weight: bold;">${timeText}</span>
+                                </div>
+                            `;
+                        }).join('');
+                        return resHtml;
+                    };
+
+                    html += renderGroup(upTrains, '方向一 (市區 / 屯門方向)');
+                    html += renderGroup(downTrains, '方向二 (烏溪沙方向)');
+                    container.innerHTML = html;
                 } else {
-                    container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">暫時未能取得實時車速資料</div>';
+                    container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px;">港鐵系統維護中</div>';
                 }
             } catch (e) {
-                container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px;">九巴連線異常</div>';
+                container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 10px;">港鐵連線失敗</div>';
             }
+        }
+
+        // 九巴自選路線與 ETA 管理
+        function getStoredBusRoutes() {
+            const saved = localStorage.getItem('custom_bus_routes');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) {}
+            }
+            return [
+                { route: '85K', stop: '003345' },
+                { route: '89C', stop: '003345' },
+                { route: '681', stop: '003345' }
+            ];
+        }
+
+        async function fetchBusETA() {
+            const container = document.getElementById('bus-eta-list');
+            const routes = getStoredBusRoutes();
+
+            if (routes.length === 0) {
+                container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">請於上方新增你想查詢嘅九巴路線</div>';
+                return;
+            }
+
+            let htmlContent = '';
+            for (let i = 0; i < routes.length; i++) {
+                let r = routes[i];
+                try {
+                    const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/1`);
+                    const data = await res.json();
+                    const etas = data.data;
+                    
+                    let timeStr = '暫無班次';
+                    let subStr = '';
+                    if (etas && etas.length > 0) {
+                        const validEtas = etas.filter(e => e.eta);
+                        if (validEtas.length > 0) {
+                            const nextTime = new Date(validEtas[0].eta);
+                            const diffMin = Math.round((nextTime - new Date()) / 60000);
+                            timeStr = diffMin <= 1 ? '將到達' : `${diffMin} 分鐘`;
+                            
+                            if (validEtas[1]) {
+                                const secondTime = new Date(validEtas[1].eta);
+                                const diffMin2 = Math.round((secondTime - new Date()) / 60000);
+                                subStr = `後續: ${diffMin2 <= 1 ? '將到達' : diffMin2 + '分鐘'}`;
+                            }
+                        }
+                    }
+
+                    htmlContent += `
+                        <div class="transit-card">
+                            <div>
+                                <span class="route-badge">${r.route}</span>
+                                <span style="font-size: 0.8rem; color: #9ca3af; margin-left: 6px;">(站: ${r.stop})</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1rem; font-weight: 700; color: var(--accent-green);">${timeStr}</div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;">${subStr}</div>
+                            </div>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1rem; margin-left:6px;">✕</button>
+                        </div>
+                    `;
+                } catch (err) {
+                    htmlContent += `
+                        <div class="transit-card">
+                            <div><span class="route-badge">${r.route}</span></div>
+                            <div style="color: #f87171; font-size: 0.9rem;">讀取失敗</div>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1rem;">✕</button>
+                        </div>
+                    `;
+                }
+            }
+            container.innerHTML = htmlContent;
+        }
+
+        function addBusRoute() {
+            const routeInput = document.getElementById('bus-route-input');
+            const stopInput = document.getElementById('bus-stop-input');
+            const routeVal = routeInput.value.trim().toUpperCase();
+            const stopVal = stopInput.value.trim() || '003345';
+
+            if (!routeVal) return;
+            let routes = getStoredBusRoutes();
+            routes.push({ route: routeVal, stop: stopVal });
+            localStorage.setItem('custom_bus_routes', JSON.stringify(routes));
+            
+            routeInput.value = '';
+            fetchBusETA();
+        }
+
+        function removeBusRoute(index) {
+            let routes = getStoredBusRoutes();
+            routes.splice(index, 1);
+            localStorage.setItem('custom_bus_routes', JSON.stringify(routes));
+            fetchBusETA();
         }
 
         async function loadMemosFromCloud() {
@@ -469,12 +547,14 @@
         setInterval(updateTime, 1000);
         setInterval(fetchWeather, 600000); 
         setInterval(loadMemosFromCloud, 30000); 
-        setInterval(fetchBusETA, 30000); // 每30秒更新一次九巴實時時間
+        setInterval(fetchMTR, 30000);
+        setInterval(fetchBusETA, 30000);
 
         updateTime(); 
         updateHoroscope();
         fetchWeather();
         loadMemosFromCloud(); 
+        fetchMTR();
         fetchBusETA();
     </script>
 </body>
