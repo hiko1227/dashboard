@@ -79,10 +79,10 @@
         .forecast-container { margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
         .forecast-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; }
 
-        /* 長駐嵌入畫格，高度適中，直接喺入面睇到實時資訊 */
+        /* 長駐嵌入畫格樣式 */
         .embedded-frame-container {
             width: 100%;
-            height: 190px;
+            height: 220px;
             border-radius: 10px;
             overflow: hidden;
             background: #ffffff;
@@ -173,29 +173,27 @@
             </div>
         </div>
 
-        <!-- 右邊欄：長駐即時交通預報 -->
+        <!-- 右邊欄：還原 iframe 長駐嵌入 -->
         <div>
-            <!-- 港鐵恆安站長駐即時檢視 -->
+            <!-- 港鐵恆安站嵌入 -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚇 港鐵恆安站 (屯馬綫即時)</span>
+                    <span>🚇 港鐵恆安站 (屯馬綫)</span>
                     <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="direct-link-btn">官網 ↗</a>
                 </div>
                 <div class="embedded-frame-container">
-                    <!-- 使用支援無阻礙 iframe 嵌入嘅實時下一班車預覽前端 -->
-                    <iframe src="https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET"></iframe>
+                    <iframe src="https://www.mtr.com.hk/ch/customer/services/next_train_index.html"></iframe>
                 </div>
             </div>
 
-            <!-- 巴士站長駐實況 (使用支援流動嵌入嘅輕量查詢介面) -->
+            <!-- 九巴實時頁面嵌入 -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚌 巴士即時到站 (錦鞍苑 / 欣安邨)</span>
+                    <span>🚌 九巴實時搜尋 (錦鞍苑 / 欣安邨)</span>
                     <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴 ↗</a>
                 </div>
                 <div class="embedded-frame-container">
-                    <!-- 嵌入九巴官方適用於流動網頁的簡易版面 / 支援嵌入之公共交通檢視介面 -->
-                    <iframe src="https://App.kmb.hk/"></iframe>
+                    <iframe src="https://search.kmb.hk/"></iframe>
                 </div>
             </div>
 
