@@ -174,13 +174,11 @@
             <div class="panel">
                 <div class="panel-title">🚇 港鐵恆安站 (屯馬綫)</div>
                 
-                <!-- DOWN 方向通常係去烏溪沙 -->
                 <div class="transport-row mtr-down">
                     <div>往 <span id="mtr-down-dest">烏溪沙</span><span class="sub-note">港鐵官方實時</span></div>
                     <span class="time-val" id="mtr-down">連線中...</span>
                 </div>
 
-                <!-- UP 方向通常係去屯門 -->
                 <div class="transport-row mtr-up">
                     <div>往 <span id="mtr-up-dest">屯門</span><span class="sub-note">港鐵官方實時</span></div>
                     <span class="time-val" id="mtr-up">連線中...</span>
@@ -295,7 +293,7 @@
             `;
         }
 
-        // 地鐵 API (動態更新目的地，防止掉轉)
+        // 港鐵 API
         async function fetchMTR() {
             try {
                 const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
@@ -322,7 +320,6 @@
                 return;
             }
 
-            // 動態更新目的地文字
             const destCode = directionObj.trains[0].dest;
             const destName = destCode === 'WKS' ? '烏溪沙' : (destCode === 'TUM' ? '屯門' : destCode);
             document.getElementById(destId).textContent = destName;
@@ -332,7 +329,7 @@
                 if (train.time) {
                     let arrivalTime = new Date(train.time.replace(/-/g, '/'));
                     let now = new Date();
-                    let diffMin = Math.floor((arrivalTime - now) / 60000); // 改用 floor 避免誤差
+                    let diffMin = Math.floor((arrivalTime - now) / 60000);
                     
                     let hh = String(arrivalTime.getHours()).padStart(2, '0');
                     let mm = String(arrivalTime.getMinutes()).padStart(2, '0');
@@ -378,45 +375,30 @@
             }
         }
 
-        // 巴士 API (加強過濾機制)
-        let targetStopIds = { kamOn: null, yanOn: null };
+        // 直接寫死恆安站附近嘅九巴正確 Stop ID（錦鞍苑同欣安邨），免除搜尋階段嘅延遲同出錯
+        const KMB_STOPS = {
+            kamOn: "003348", // 錦鞍苑固定 ID
+            yanOn: "003662"  // 欣安邨固定 ID
+        };
 
         async function fetchBusETA() {
             try {
-                // 如果未有車站 ID，先去九巴系統搵返出來
-                if (!targetStopIds.kamOn || !targetStopIds.yanOn) {
-                    const stopsRes = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop');
-                    const stopsData = await stopsRes.json();
-                    
-                    if (stopsData && stopsData.data) {
-                        const kamOnStop = stopsData.data.find(s => s.name_tc.includes('錦鞍苑'));
-                        const yanOnStop = stopsData.data.find(s => s.name_tc.includes('欣安邨'));
-                        
-                        if (kamOnStop) targetStopIds.kamOn = kamOnStop.stop;
-                        if (yanOnStop) targetStopIds.yanOn = yanOnStop.stop;
-                    }
-                }
-
-                // 獲取錦鞍苑數據 (過濾 89C 往觀塘方向)
-                if (targetStopIds.kamOn) {
-                    const res1 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${targetStopIds.kamOn}`);
-                    const data1 = await res1.json();
-                    if (data1 && data1.data) {
-                        let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
-                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta)); // 確保按時間排
-                        formatAndDisplayETA(etas, 'k-89c', 'k-special');
-                    }
+                // 錦鞍苑 89C
+                const res1 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.kamOn}`);
+                const data1 = await res1.json();
+                if (data1 && data1.data) {
+                    let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
+                    etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
+                    formatAndDisplayETA(etas, 'k-89c', 'k-special');
                 }
                 
-                // 獲取欣安邨數據 (過濾 89C 往觀塘方向)
-                if (targetStopIds.yanOn) {
-                    const res2 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${targetStopIds.yanOn}`);
-                    const data2 = await res2.json();
-                    if (data2 && data2.data) {
-                        let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
-                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                        formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
-                    }
+                // 欣安邨 89C
+                const res2 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.yanOn}`);
+                const data2 = await res2.json();
+                if (data2 && data2.data) {
+                    let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
+                    etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
+                    formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
                 }
             } catch (e) {
                 document.getElementById('k-89c').textContent = '暫時無法連接';
@@ -435,7 +417,7 @@
             let specialList = [];
 
             stationEtas.forEach(eta => {
-                if (!eta.eta) return; // 避開 API 彈出嘅 null 無效數據
+                if (!eta.eta) return; 
 
                 let timeStr = formatArrivalTime(eta.eta);
                 if (timeStr) {
@@ -447,7 +429,6 @@
                 }
             });
 
-            // 限制最多顯示 3 班車，畫面乾淨啲
             document.getElementById(normalId).textContent = normalList.length > 0 ? normalList.slice(0, 3).join(', ') : '暫無班次';
             document.getElementById(specialId).textContent = specialList.length > 0 ? specialList.slice(0, 2).join(', ') : '非服務時間';
         }
