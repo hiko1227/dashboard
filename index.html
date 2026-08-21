@@ -79,14 +79,35 @@
         .forecast-container { margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
         .forecast-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; }
 
-        .transport-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin: 6px 0; border-radius: 10px; font-weight: 700; font-size: 1.1rem; background: rgba(255,255,255,0.05); }
-        .mtr-up { border-left: 6px solid var(--accent-blue); }
-        .mtr-down { border-left: 6px solid var(--accent-purple); }
-        .bus-normal { border-left: 6px solid var(--accent-green); }
+        /* 長駐嵌入畫格樣式 */
+        .embedded-frame-container {
+            width: 100%;
+            height: 180px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-top: 6px;
+        }
+        .embedded-frame-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            filter: invert(90%) hue-rotate(180deg); /* 試圖將官方白底轉為暗色配合你嘅 Dashboard，如果看得不順眼可以刪掉呢行 */
+        }
         
-        .time-val { color: var(--accent-green); font-size: 1.05rem; font-weight: 800; text-align: right; }
-        .sub-note { font-size: 0.85rem; color: #9ca3af; font-weight: normal; display: block; }
-        
+        .direct-link-btn {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            color: var(--accent-blue);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .direct-link-btn:hover { background: rgba(255,255,255,0.2); }
+
         .memo-input-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .memo-input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; color: #fff; font-size: 1.15rem; outline: none; }
         .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
@@ -153,35 +174,28 @@
             </div>
         </div>
 
-        <!-- 右邊欄 -->
+        <!-- 右邊欄：長駐交通實況 -->
         <div>
-            <!-- 港鐵面板：恆安站 -->
+            <!-- 港鐵恆安站長駐 -->
             <div class="panel">
-                <div class="panel-title">🚇 港鐵恆安站 (屯馬綫)</div>
-                
-                <div class="transport-row mtr-down">
-                    <div>往 烏溪沙<span class="sub-note">自動更新</span></div>
-                    <span class="time-val" id="mtr-down">連線中...</span>
+                <div class="panel-title">
+                    <span>🚇 港鐵恆安站 實時資訊</span>
+                    <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="direct-link-btn">在新視窗開啟 ↗</a>
                 </div>
-
-                <div class="transport-row mtr-up">
-                    <div>往 屯門方向<span class="sub-note">自動更新</span></div>
-                    <span class="time-val" id="mtr-up">連線中...</span>
+                <div class="embedded-frame-container">
+                    <!-- 載入港鐵官方Next Train頁面或對應查詢 -->
+                    <iframe src="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" loading="lazy"></iframe>
                 </div>
             </div>
 
-            <!-- 巴士面板：2個指定站 -->
+            <!-- 巴士站長駐 (例如九巴常用站或地圖) -->
             <div class="panel">
-                <div class="panel-title">🚌 實時巴士到站</div>
-                
-                <div class="transport-row bus-normal">
-                    <div>錦鞍苑 - 89C (往觀塘)<span class="sub-note">自動更新</span></div>
-                    <span class="time-val" id="bus-1">連線中...</span>
+                <div class="panel-title">
+                    <span>🚌 巴士實時到站 (九巴)</span>
+                    <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴搜尋 ↗</a>
                 </div>
-
-                <div class="transport-row bus-normal" style="border-left-color: #38bdf8;">
-                    <div>欣安邨 - 89C (往觀塘)<span class="sub-note">自動更新</span></div>
-                    <span class="time-val" id="bus-2">連線中...</span>
+                <div class="embedded-frame-container">
+                    <iframe src="https://search.kmb.hk/" loading="lazy"></iframe>
                 </div>
             </div>
 
@@ -254,42 +268,6 @@
             `;
         }
 
-        // 使用穩定中轉 Proxy 抓取港鐵數據，確保自動更新唔會被 CORS 封鎖
-        async function fetchMTR() {
-            try {
-                const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                const res = await fetch(proxyUrl);
-                const json = await res.json();
-                if (!json.contents) throw new Error();
-                const data = JSON.parse(json.contents);
-
-                if (data && data.status === 1 && data.data && data.data['TML-HET']) {
-                    const het = data.data['TML-HET'];
-                    parseMTR(het.DOWN, 'mtr-down');
-                    parseMTR(het.UP, 'mtr-up');
-                }
-            } catch (e) {
-                document.getElementById('mtr-down').textContent = '更新中...';
-                document.getElementById('mtr-up').textContent = '更新中...';
-            }
-        }
-
-        function parseMTR(dirObj, elementId) {
-            if (!dirObj || !dirObj.trains || dirObj.trains.length === 0) {
-                document.getElementById(elementId).textContent = '暫無班次';
-                return;
-            }
-            let times = [];
-            dirObj.trains.forEach(t => {
-                if (t.time) {
-                    let diff = Math.floor((new Date(t.time.replace(/-/g, '/')) - new Date()) / 60000);
-                    times.push(diff <= 0 ? '將至' : `${diff}分鐘`);
-                }
-            });
-            document.getElementById(elementId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '暫無班次';
-        }
-
         async function fetchWeather() {
             try {
                 const tempRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
@@ -309,46 +287,6 @@
             } catch (e) {
                 document.getElementById('current-desc').textContent = '天文台數據更新中';
             }
-        }
-
-        // 使用穩定中轉 Proxy 抓取九巴數據（錦鞍苑 003348、欣安邨 003662）
-        async function fetchBusETA() {
-            try {
-                // 1. 錦鞍苑 89C
-                const url1 = 'https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003348';
-                const r1 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url1)}`);
-                const j1 = await r1.json();
-                if (j1.contents) {
-                    const d1 = JSON.parse(j1.contents);
-                    if (d1?.data) {
-                        let etas = d1.data.filter(e => e.route === '89C' && e.dir === 'O');
-                        etas.sort((a,b) => new Date(a.eta) - new Date(b.eta));
-                        document.getElementById('bus-1').textContent = etas.length > 0 ? formatEtaTime(etas[0].eta) : '暫無班次';
-                    }
-                }
-
-                // 2. 欣安邨 89C
-                const url2 = 'https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/003662';
-                const r2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url2)}`);
-                const j2 = await r2.json();
-                if (j2.contents) {
-                    const d2 = JSON.parse(j2.contents);
-                    if (d2?.data) {
-                        let etas2 = d2.data.filter(e => e.route === '89C' && e.dir === 'O');
-                        etas2.sort((a,b) => new Date(a.eta) - new Date(b.eta));
-                        document.getElementById('bus-2').textContent = etas2.length > 0 ? formatEtaTime(etas2[0].eta) : '暫無班次';
-                    }
-                }
-            } catch (e) {
-                document.getElementById('bus-1').textContent = '更新中...';
-                document.getElementById('bus-2').textContent = '更新中...';
-            }
-        }
-
-        function formatEtaTime(etaStr) {
-            if (!etaStr) return '暫無班次';
-            let diff = Math.floor((new Date(etaStr) - new Date()) / 60000);
-            return diff <= 0 ? '將至' : `${diff}分鐘`;
         }
 
         async function loadMemosFromCloud() {
@@ -423,18 +361,13 @@
             await saveMemosToCloud(memos);
         }
 
-        // 自動定時更新（每 30 秒自動抓取最新數據，完全唔使手動 refresh）
         setInterval(updateTime, 1000);
         setInterval(fetchWeather, 600000); 
-        setInterval(fetchBusETA, 30000); 
-        setInterval(fetchMTR, 30000); 
         setInterval(loadMemosFromCloud, 30000); 
 
         updateTime(); 
         updateHoroscope();
         fetchWeather();
-        fetchBusETA();
-        fetchMTR();
         loadMemosFromCloud(); 
     </script>
 </body>
