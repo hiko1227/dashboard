@@ -79,10 +79,10 @@
         .forecast-container { margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
         .forecast-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; }
 
-        /* 長駐嵌入畫格樣式 */
+        /* 長駐嵌入畫格樣式 (高度調高少許方便直接睇) */
         .embedded-frame-container {
             width: 100%;
-            height: 180px;
+            height: 220px;
             border-radius: 10px;
             overflow: hidden;
             background: #111827;
@@ -93,7 +93,6 @@
             width: 100%;
             height: 100%;
             border: none;
-            filter: invert(90%) hue-rotate(180deg); /* 試圖將官方白底轉為暗色配合你嘅 Dashboard，如果看得不順眼可以刪掉呢行 */
         }
         
         .direct-link-btn {
@@ -174,28 +173,29 @@
             </div>
         </div>
 
-        <!-- 右邊欄：長駐交通實況 -->
+        <!-- 右邊欄：鎖定恆安站與指定巴士站 -->
         <div>
-            <!-- 港鐵恆安站長駐 -->
+            <!-- 港鐵恆安站鎖定 -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚇 港鐵恆安站 實時資訊</span>
-                    <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="direct-link-btn">在新視窗開啟 ↗</a>
+                    <span>🚇 港鐵恆安站 (屯馬綫)</span>
+                    <a href="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" target="_blank" class="direct-link-btn">官網 ↗</a>
                 </div>
                 <div class="embedded-frame-container">
-                    <!-- 載入港鐵官方Next Train頁面或對應查詢 -->
-                    <iframe src="https://www.mtr.com.hk/ch/customer/services/next_train_index.html" loading="lazy"></iframe>
+                    <!-- 直接連到 MTR 屯馬綫恆安站 (HET) 官方即時直達檢視 -->
+                    <iframe src="https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET" style="background:#fff;"></iframe>
                 </div>
             </div>
 
-            <!-- 巴士站長駐 (例如九巴常用站或地圖) -->
+            <!-- 巴士站鎖定 (錦鞍苑 / 欣安邨) -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚌 巴士實時到站 (九巴)</span>
-                    <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴搜尋 ↗</a>
+                    <span>🚌 巴士實時 (錦鞍苑 / 欣安邨)</span>
+                    <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴 ↗</a>
                 </div>
                 <div class="embedded-frame-container">
-                    <iframe src="https://search.kmb.hk/" loading="lazy"></iframe>
+                    <!-- 使用支援直接檢視站點嘅簡易流動版介面或九巴官方地圖查詢頁 -->
+                    <iframe src="https://etabus.gov.hk/" style="background:#fff;"></iframe>
                 </div>
             </div>
 
