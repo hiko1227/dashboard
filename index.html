@@ -177,12 +177,12 @@
     <div class="main-grid">
         <!-- 左邊欄 -->
         <div>
-            <!-- 天氣面板 (極簡空間優化) -->
+            <!-- 天氣面板 -->
             <div class="panel">
                 <div class="panel-title"><span>☀️ 香港天文台 (沙田實況)</span></div>
                 <div class="wx-box">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 52px; height: 52px; display: none;">
+                        <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 52px; height: 52px; display: none;" onerror="this.style.display='none'">
                         <span class="wx-temp" id="current-temp">--°C</span>
                     </div>
                     <div style="text-align: right; font-size: 1.05rem; font-weight: 600;">
@@ -210,21 +210,19 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵恆安站 API 實時面板 -->
+            <!-- 港鐵恆安站 API 實時面板 (已移除標題文字) -->
             <div class="panel">
-                <div class="panel-title">
-                    <span>🚇 港鐵恆安站 (屯馬綫)</span>
-                    <button class="refresh-memo-btn" onclick="fetchMTR()">🔄 更新</button>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
+                    <button class="refresh-memo-btn" onclick="fetchMTR()">🔄 更新港鐵</button>
                 </div>
                 <div class="transit-container" id="mtr-eta-list">
                     <div style="color: #9ca3af; text-align: center; padding: 15px;">載入港鐵實時資料中...</div>
                 </div>
             </div>
 
-            <!-- 九巴實時 ETA 面板 -->
+            <!-- 九巴實時 ETA 面板 (已移除標題文字) -->
             <div class="panel">
-                <div class="panel-title">
-                    <span>🚌 九巴實時 ETA (自選管理)</span>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 6px;">
                     <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴網 ↗</a>
                 </div>
                 <div class="transit-input-box">
@@ -264,22 +262,19 @@
                 const solar = Solar.fromDate(now);
                 const lunar = solar.getLunar();
                 const lunarDay = lunar.getDay();
+                
+                // 更準確之月相陰影對應 (農曆初一至三十)
                 let shadowTransform = 'translateX(0%)';
-                if (lunarDay === 1) shadowTransform = 'translateX(0%)';
-                else if (lunarDay > 1 && lunarDay < 7) shadowTransform = 'translateX(35%)';
-                else if (lunarDay === 7 || lunarDay === 8) shadowTransform = 'translateX(50%)';
-                else if (lunarDay > 8 && lunarDay < 15) shadowTransform = 'translateX(75%)';
-                else if (lunarDay === 15 || lunarDay === 16) shadowTransform = 'translateX(100%)';
-                else if (lunarDay > 16 && lunarDay < 22) shadowTransform = 'translateX(-75%)';
-                else if (lunarDay === 22 || lunarDay === 23) shadowTransform = 'translateX(-50%)';
-                else shadowTransform = 'translateX(-35%)';
+                const ratio = (lunarDay - 1) / 29;
+                let translateVal = (ratio * 200) - 100; 
+                shadowTransform = `translateX(${translateVal}%)`;
+                
                 document.getElementById('moon-shadow').style.transform = shadowTransform;
             } catch (e) {}
         }
 
         async function fetchWeather() {
             try {
-                // 1. 取得實況溫度與天氣圖示代號
                 const tempRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
                 const tempData = await tempRes.json();
                 if (tempData?.temperature?.data) {
@@ -289,11 +284,10 @@
                 if (tempData?.icon && tempData.icon.length > 0) {
                     const iconCode = tempData.icon[0];
                     const iconImg = document.getElementById('wx-icon-img');
-                    iconImg.src = `https://www.hko.gov.hk/images/HKOWxIcon/pic${iconCode}.png`;
+                    iconImg.src = `https://www.hko.gov.hk/images/wxicon/pic${iconCode}.png`;
                     iconImg.style.display = 'block';
                 }
 
-                // 2. 取得今日最高最低氣溫 (從九天預報中獲取當天資料)
                 const fRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
                 const fData = await fRes.json();
                 if (fData?.weatherForecast?.length > 0) {
@@ -361,7 +355,7 @@
             }
         }
 
-        // 九巴自選路線、站號與自訂名稱管理 (含首班及後2班、特別班次備註)
+        // 九巴自選路線管理
         function getStoredBusRoutes() {
             const saved = localStorage.getItem('custom_bus_routes');
             if (saved) {
@@ -385,7 +379,6 @@
             let htmlContent = '';
             for (let i = 0; i < routes.length; i++) {
                 let r = routes[i];
-                let nameHtml = r.name ? `<div style="font-size: 1rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 2px;">${r.name}</div>` : '';
                 
                 try {
                     const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/1`);
@@ -423,13 +416,14 @@
                         etasListHtml = '<div style="color: #9ca3af; font-size: 0.9rem; margin-top: 4px;">暫無班次</div>';
                     }
 
+                    // 路線、車站、自訂名稱放同一行
                     htmlContent += `
                         <div class="transit-card">
                             <div style="flex: 1;">
-                                ${nameHtml}
-                                <div style="display: flex; align-items: center; gap: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                     <span class="route-badge">${r.route}</span>
-                                    <span style="font-size: 0.8rem; color: #9ca3af;">(站: ${r.stop})</span>
+                                    <span style="font-size: 0.85rem; color: #9ca3af;">(${r.stop})</span>
+                                    ${r.name ? `<span style="font-size: 1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                                 </div>
                                 <div style="margin-top: 2px;">
                                     ${etasListHtml}
@@ -442,8 +436,11 @@
                     htmlContent += `
                         <div class="transit-card">
                             <div style="flex: 1;">
-                                ${nameHtml}
-                                <div><span class="route-badge">${r.route}</span> <span style="font-size:0.8rem; color:#9ca3af;">(站: ${r.stop})</span></div>
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span class="route-badge">${r.route}</span>
+                                    <span style="font-size: 0.85rem; color: #9ca3af;">(${r.stop})</span>
+                                    ${r.name ? `<span style="font-size: 1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
+                                </div>
                                 <div style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">讀取失敗</div>
                             </div>
                             <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
