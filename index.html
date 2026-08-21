@@ -175,12 +175,12 @@
                 <div class="panel-title">🚇 港鐵恆安站 (屯馬綫)</div>
                 
                 <div class="transport-row mtr-down">
-                    <div>往 <span id="mtr-down-dest">烏溪沙</span><span class="sub-note">港鐵官方實時</span></div>
+                    <div>往 烏溪沙<span class="sub-note">港鐵官方實時</span></div>
                     <span class="time-val" id="mtr-down">連線中...</span>
                 </div>
 
                 <div class="transport-row mtr-up">
-                    <div>往 <span id="mtr-up-dest">屯門</span><span class="sub-note">港鐵官方實時</span></div>
+                    <div>往 屯門<span class="sub-note">港鐵官方實時</span></div>
                     <span class="time-val" id="mtr-up">連線中...</span>
                 </div>
             </div>
@@ -293,17 +293,20 @@
             `;
         }
 
-        // 港鐵 API
+        // 使用通用 CORS 代理（AllOrigins）包裝 MTR API，解決跨來源封鎖問題
         async function fetchMTR() {
             try {
-                const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
-                const res = await fetch(targetUrl);
-                const data = await res.json();
+                const rawUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`;
+                const res = await fetch(proxyUrl);
+                const json = await res.json();
+                if (!json.contents) throw new Error('No contents');
+                const data = JSON.parse(json.contents);
 
                 if (data && data.status === 1 && data.data && data.data['TML-HET']) {
                     const hetData = data.data['TML-HET'];
-                    parseMTRDirection(hetData.UP, 'mtr-up', 'mtr-up-dest');
-                    parseMTRDirection(hetData.DOWN, 'mtr-down', 'mtr-down-dest');
+                    parseMTRDirection(hetData.DOWN, 'mtr-down');
+                    parseMTRDirection(hetData.UP, 'mtr-up');
                 } else {
                     document.getElementById('mtr-up').textContent = '暫無班次';
                     document.getElementById('mtr-down').textContent = '暫無班次';
@@ -314,15 +317,11 @@
             }
         }
 
-        function parseMTRDirection(directionObj, timeId, destId) {
+        function parseMTRDirection(directionObj, timeId) {
             if (!directionObj || !directionObj.trains || directionObj.trains.length === 0) {
                 document.getElementById(timeId).textContent = '暫無班次';
                 return;
             }
-
-            const destCode = directionObj.trains[0].dest;
-            const destName = destCode === 'WKS' ? '烏溪沙' : (destCode === 'TUM' ? '屯門' : destCode);
-            document.getElementById(destId).textContent = destName;
 
             let times = [];
             directionObj.trains.forEach(train => {
@@ -343,7 +342,7 @@
                 }
             });
 
-            document.getElementById(timeId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '--';
+            document.getElementById(timeId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '暫無班次';
         }
 
         async function fetchWeather() {
@@ -375,30 +374,39 @@
             }
         }
 
-        // 直接寫死恆安站附近嘅九巴正確 Stop ID（錦鞍苑同欣安邨），免除搜尋階段嘅延遲同出錯
+        // 89C 官方正確 Stop ID (錦鞍苑: MA321 / 欣安邨: MA140)
         const KMB_STOPS = {
-            kamOn: "003348", // 錦鞍苑固定 ID
-            yanOn: "003662"  // 欣安邨固定 ID
+            kamOn: "MA321", 
+            yanOn: "MA140"  
         };
 
+        // 使用 CORS 代理包裝九巴 API
         async function fetchBusETA() {
             try {
                 // 錦鞍苑 89C
-                const res1 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.kamOn}`);
-                const data1 = await res1.json();
-                if (data1 && data1.data) {
-                    let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
-                    etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                    formatAndDisplayETA(etas, 'k-89c', 'k-special');
+                const url1 = `https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.kamOn}`;
+                const res1 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url1)}`);
+                const json1 = await res1.json();
+                if (json1.contents) {
+                    const data1 = JSON.parse(json1.contents);
+                    if (data1 && data1.data) {
+                        let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
+                        formatAndDisplayETA(etas, 'k-89c', 'k-special');
+                    }
                 }
                 
                 // 欣安邨 89C
-                const res2 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.yanOn}`);
-                const data2 = await res2.json();
-                if (data2 && data2.data) {
-                    let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
-                    etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                    formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
+                const url2 = `https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${KMB_STOPS.yanOn}`;
+                const res2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url2)}`);
+                const json2 = await res2.json();
+                if (json2.contents) {
+                    const data2 = JSON.parse(json2.contents);
+                    if (data2 && data2.data) {
+                        let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
+                        formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
+                    }
                 }
             } catch (e) {
                 document.getElementById('k-89c').textContent = '暫時無法連接';
