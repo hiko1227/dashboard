@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>星空個人 Dashboard</title>
+    <title>3008 Dashboard</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -172,16 +172,18 @@
         <div>
             <!-- 港鐵面板 -->
             <div class="panel">
-                <div class="panel-title">🚇 港鐵恆安站 (屯馬線)</div>
+                <div class="panel-title">🚇 港鐵恆安站 (屯馬綫)</div>
                 
-                <div class="transport-row mtr-up">
-                    <div>往 烏溪沙<span class="sub-note">港鐵官方實時</span></div>
-                    <span class="time-val" id="mtr-up">連線中...</span>
-                </div>
-                
+                <!-- DOWN 方向通常係去烏溪沙 -->
                 <div class="transport-row mtr-down">
-                    <div>往 屯門<span class="sub-note">港鐵官方實時</span></div>
+                    <div>往 <span id="mtr-down-dest">烏溪沙</span><span class="sub-note">港鐵官方實時</span></div>
                     <span class="time-val" id="mtr-down">連線中...</span>
+                </div>
+
+                <!-- UP 方向通常係去屯門 -->
+                <div class="transport-row mtr-up">
+                    <div>往 <span id="mtr-up-dest">屯門</span><span class="sub-note">港鐵官方實時</span></div>
+                    <span class="time-val" id="mtr-up">連線中...</span>
                 </div>
             </div>
 
@@ -210,7 +212,7 @@
                 </div>
             </div>
 
-            <!-- 星象面板 (移到右邊) -->
+            <!-- 星象面板 -->
             <div class="panel">
                 <div class="panel-title"><span>♑ 摩羯座 (Capricorn) 每日運勢</span></div>
                 <div id="horoscope-content" style="font-size: 1.05rem; padding-top: 4px; line-height: 1.5;">
@@ -293,7 +295,7 @@
             `;
         }
 
-        // 地鐵 API (已修復: MOS 轉為最新嘅 TML 屯馬綫)
+        // 地鐵 API (動態更新目的地，防止掉轉)
         async function fetchMTR() {
             try {
                 const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=TML&sta=HET';
@@ -302,8 +304,8 @@
 
                 if (data && data.status === 1 && data.data && data.data['TML-HET']) {
                     const hetData = data.data['TML-HET'];
-                    parseMTRDirection(hetData.UP, 'mtr-up');
-                    parseMTRDirection(hetData.DOWN, 'mtr-down');
+                    parseMTRDirection(hetData.UP, 'mtr-up', 'mtr-up-dest');
+                    parseMTRDirection(hetData.DOWN, 'mtr-down', 'mtr-down-dest');
                 } else {
                     document.getElementById('mtr-up').textContent = '暫無班次';
                     document.getElementById('mtr-down').textContent = '暫無班次';
@@ -314,18 +316,23 @@
             }
         }
 
-        function parseMTRDirection(directionObj, elementId) {
+        function parseMTRDirection(directionObj, timeId, destId) {
             if (!directionObj || !directionObj.trains || directionObj.trains.length === 0) {
-                document.getElementById(elementId).textContent = '暫無班次';
+                document.getElementById(timeId).textContent = '暫無班次';
                 return;
             }
+
+            // 動態更新目的地文字
+            const destCode = directionObj.trains[0].dest;
+            const destName = destCode === 'WKS' ? '烏溪沙' : (destCode === 'TUM' ? '屯門' : destCode);
+            document.getElementById(destId).textContent = destName;
 
             let times = [];
             directionObj.trains.forEach(train => {
                 if (train.time) {
                     let arrivalTime = new Date(train.time.replace(/-/g, '/'));
                     let now = new Date();
-                    let diffMin = Math.round((arrivalTime - now) / 60000);
+                    let diffMin = Math.floor((arrivalTime - now) / 60000); // 改用 floor 避免誤差
                     
                     let hh = String(arrivalTime.getHours()).padStart(2, '0');
                     let mm = String(arrivalTime.getMinutes()).padStart(2, '0');
@@ -339,7 +346,7 @@
                 }
             });
 
-            document.getElementById(elementId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '--';
+            document.getElementById(timeId).textContent = times.length > 0 ? times.slice(0, 2).join(' | ') : '--';
         }
 
         async function fetchWeather() {
@@ -371,16 +378,13 @@
             }
         }
 
-        // 智能尋找車站 ID
+        // 巴士 API (加強過濾機制)
         let targetStopIds = { kamOn: null, yanOn: null };
 
-        // 巴士 API (已修復: 重新架構 API 抓取邏輯，動態配對正確車站 ID)
         async function fetchBusETA() {
             try {
+                // 如果未有車站 ID，先去九巴系統搵返出來
                 if (!targetStopIds.kamOn || !targetStopIds.yanOn) {
-                    document.getElementById('k-89c').textContent = '搜尋車站中...';
-                    document.getElementById('hin-89c').textContent = '搜尋車站中...';
-                    
                     const stopsRes = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop');
                     const stopsData = await stopsRes.json();
                     
@@ -393,22 +397,24 @@
                     }
                 }
 
-                // 獲取錦鞍苑數據
+                // 獲取錦鞍苑數據 (過濾 89C 往觀塘方向)
                 if (targetStopIds.kamOn) {
                     const res1 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${targetStopIds.kamOn}`);
                     const data1 = await res1.json();
                     if (data1 && data1.data) {
                         let etas = data1.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta)); // 確保按時間排
                         formatAndDisplayETA(etas, 'k-89c', 'k-special');
                     }
                 }
                 
-                // 獲取欣安邨數據
+                // 獲取欣安邨數據 (過濾 89C 往觀塘方向)
                 if (targetStopIds.yanOn) {
                     const res2 = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${targetStopIds.yanOn}`);
                     const data2 = await res2.json();
                     if (data2 && data2.data) {
                         let etas = data2.data.filter(e => e.route === '89C' && e.dir === 'O');
+                        etas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
                         formatAndDisplayETA(etas, 'hin-89c', 'hin-special');
                     }
                 }
@@ -429,9 +435,10 @@
             let specialList = [];
 
             stationEtas.forEach(eta => {
+                if (!eta.eta) return; // 避開 API 彈出嘅 null 無效數據
+
                 let timeStr = formatArrivalTime(eta.eta);
                 if (timeStr) {
-                    // 特別班次通常 service_type 會大過 1，或者 rmk_tc 會標記特別
                     if (eta.service_type > 1 || (eta.rmk_tc && eta.rmk_tc.includes('特別'))) {
                         specialList.push(timeStr);
                     } else {
@@ -440,15 +447,16 @@
                 }
             });
 
-            document.getElementById(normalId).textContent = normalList.length > 0 ? normalList.join(', ') : '暫無班次';
-            document.getElementById(specialId).textContent = specialList.length > 0 ? specialList.join(', ') : '非服務時間';
+            // 限制最多顯示 3 班車，畫面乾淨啲
+            document.getElementById(normalId).textContent = normalList.length > 0 ? normalList.slice(0, 3).join(', ') : '暫無班次';
+            document.getElementById(specialId).textContent = specialList.length > 0 ? specialList.slice(0, 2).join(', ') : '非服務時間';
         }
 
         function formatArrivalTime(etaString) {
             if (!etaString) return null;
             const arrival = new Date(etaString);
             const now = new Date();
-            const diffMin = Math.round((arrival - now) / 60000);
+            const diffMin = Math.floor((arrival - now) / 60000);
             if (diffMin <= 0) return '將至';
             return `${diffMin}分鐘`;
         }
