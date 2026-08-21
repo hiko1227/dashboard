@@ -123,11 +123,11 @@
             align-items: center;
         }
         .route-badge {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: var(--accent-yellow);
             background: rgba(251, 191, 36, 0.15);
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 6px;
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
@@ -142,11 +142,9 @@
             padding: 6px 10px;
             border-radius: 6px;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             outline: none;
         }
-        .transit-input.short { width: 70px; text-align: center; }
-        .transit-input.long { flex: 1; }
         .transit-add-btn {
             background: var(--accent-blue);
             color: #0b0f19;
@@ -154,8 +152,9 @@
             padding: 0 12px;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -213,10 +212,10 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵恆安站 API 實時面板 -->
+            <!-- 港鐵恆安站 API 實時面板 (連到站時間) -->
             <div class="panel">
                 <div class="panel-title">
-                    <span>🚇 港鐵恆安站 (屯馬綫 API)</span>
+                    <span>🚇 港鐵恆安站 (屯馬綫)</span>
                     <button class="refresh-memo-btn" onclick="fetchMTR()">🔄 更新</button>
                 </div>
                 <div class="transit-container" id="mtr-eta-list">
@@ -224,15 +223,16 @@
                 </div>
             </div>
 
-            <!-- 九巴實時 ETA 面板 (支援自選路線及站號) -->
+            <!-- 九巴實時 ETA 面板 (支援自選名稱、路線及站號) -->
             <div class="panel">
                 <div class="panel-title">
                     <span>🚌 九巴實時 ETA (自選管理)</span>
                     <a href="https://search.kmb.hk/" target="_blank" class="direct-link-btn">九巴網 ↗</a>
                 </div>
                 <div class="transit-input-box">
-                    <input type="text" id="bus-route-input" class="transit-input short" placeholder="路線(如85K)">
-                    <input type="text" id="bus-stop-input" class="transit-input long" placeholder="站ID(預設錦鞍苑 003345)" value="003345">
+                    <input type="text" id="bus-route-input" class="transit-input" style="width: 65px; text-align: center;" placeholder="路線">
+                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
+                    <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱 (例: 返工/返屋企)">
                     <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
                 </div>
                 <div class="transit-container" id="bus-eta-list">
@@ -330,7 +330,7 @@
             }
         }
 
-        // 港鐵 API 抓取 (恆安站 TML-HEO)
+        // 港鐵 API 抓取 (恆安站 TML-HEO) + 顯示具體到站時間
         async function fetchMTR() {
             const container = document.getElementById('mtr-eta-list');
             try {
@@ -355,11 +355,16 @@
                             const destName = destMap[t.dest] || t.dest;
                             const trainTime = new Date(t.time.replace(/-/g, '/'));
                             const diffMin = Math.round((trainTime - new Date()) / 60000);
-                            const timeText = diffMin <= 0 ? '即將到達' : `${diffMin} 分鐘`;
+                            
+                            const trainHours = String(trainTime.getHours()).padStart(2, '0');
+                            const trainMinutes = String(trainTime.getMinutes()).padStart(2, '0');
+                            const clockTime = `${trainHours}:${trainMinutes}`;
+
+                            const timeText = diffMin <= 0 ? `即將到達 (${clockTime})` : `${diffMin} 分鐘 (${clockTime})`;
                             return `
                                 <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 8px; border-radius: 6px; margin-bottom: 3px; font-size: 0.95rem;">
-                                    <span>往 <b>${destName}</b> (月台 ${t.plat})</span>
-                                    <span style="color: var(--accent-green); font-weight: bold;">${timeText}</span>
+                                    <span>往 <b>${destName}</b> <span style="font-size:0.8rem; color:#9ca3af;">(月台 ${t.plat})</span></span>
+                                    <span style="color: var(--accent-green); font-weight: bold; font-size: 0.9rem;">${timeText}</span>
                                 </div>
                             `;
                         }).join('');
@@ -377,16 +382,15 @@
             }
         }
 
-        // 九巴自選路線與 ETA 管理
+        // 九巴自選路線、站號與自訂名稱管理
         function getStoredBusRoutes() {
             const saved = localStorage.getItem('custom_bus_routes');
             if (saved) {
                 try { return JSON.parse(saved); } catch (e) {}
             }
             return [
-                { route: '85K', stop: '003345' },
-                { route: '89C', stop: '003345' },
-                { route: '681', stop: '003345' }
+                { route: '85K', stop: '003345', name: '錦鞍苑往沙田' },
+                { route: '681', stop: '003345', name: '錦鞍苑往港島' }
             ];
         }
 
@@ -402,6 +406,8 @@
             let htmlContent = '';
             for (let i = 0; i < routes.length; i++) {
                 let r = routes[i];
+                let nameHtml = r.name ? `<div style="font-size: 1rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 2px;">${r.name}</div>` : '';
+                
                 try {
                     const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/1`);
                     const data = await res.json();
@@ -426,23 +432,29 @@
 
                     htmlContent += `
                         <div class="transit-card">
-                            <div>
-                                <span class="route-badge">${r.route}</span>
-                                <span style="font-size: 0.8rem; color: #9ca3af; margin-left: 6px;">(站: ${r.stop})</span>
+                            <div style="flex: 1;">
+                                ${nameHtml}
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="route-badge">${r.route}</span>
+                                    <span style="font-size: 0.8rem; color: #9ca3af;">(站: ${r.stop})</span>
+                                </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div style="text-align: right; margin-right: 8px;">
                                 <div style="font-size: 1rem; font-weight: 700; color: var(--accent-green);">${timeStr}</div>
                                 <div style="font-size: 0.8rem; color: #9ca3af;">${subStr}</div>
                             </div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1rem; margin-left:6px;">✕</button>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem; padding: 4px;">✕</button>
                         </div>
                     `;
                 } catch (err) {
                     htmlContent += `
                         <div class="transit-card">
-                            <div><span class="route-badge">${r.route}</span></div>
-                            <div style="color: #f87171; font-size: 0.9rem;">讀取失敗</div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1rem;">✕</button>
+                            <div style="flex: 1;">
+                                ${nameHtml}
+                                <div><span class="route-badge">${r.route}</span> <span style="font-size:0.8rem; color:#9ca3af;">(站: ${r.stop})</span></div>
+                            </div>
+                            <div style="color: #f87171; font-size: 0.9rem; margin-right: 8px;">讀取失敗</div>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
                         </div>
                     `;
                 }
@@ -453,15 +465,19 @@
         function addBusRoute() {
             const routeInput = document.getElementById('bus-route-input');
             const stopInput = document.getElementById('bus-stop-input');
+            const nameInput = document.getElementById('bus-name-input');
+            
             const routeVal = routeInput.value.trim().toUpperCase();
             const stopVal = stopInput.value.trim() || '003345';
+            const nameVal = nameInput.value.trim();
 
             if (!routeVal) return;
             let routes = getStoredBusRoutes();
-            routes.push({ route: routeVal, stop: stopVal });
+            routes.push({ route: routeVal, stop: stopVal, name: nameVal });
             localStorage.setItem('custom_bus_routes', JSON.stringify(routes));
             
             routeInput.value = '';
+            nameInput.value = '';
             fetchBusETA();
         }
 
