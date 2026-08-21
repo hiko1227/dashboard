@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>星空個人 Dashboard</title>
+    <title>3008 Dashboard</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -250,9 +250,8 @@
         async function fetchMTR() {
             try {
                 const targetUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=MOS&sta=HET';
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                const wrapper = await res.json();
-                const data = JSON.parse(wrapper.contents);
+                const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`);
+                const data = await res.json();
 
                 if (data && data.status === 1 && data.data && data.data['HET']) {
                     const hetData = data.data['HET'];
@@ -328,9 +327,8 @@
         async function fetchBusETA() {
             try {
                 const targetUrl = 'https://data.etabus.gov.hk/v1/transport/kmb/eta/route/89C';
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                const wrapper = await res.json();
-                const data = JSON.parse(wrapper.contents);
+                const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`);
+                const data = await res.json();
 
                 if (data && data.data) {
                     const etas = data.data;
@@ -448,8 +446,7 @@
             const targetIndex = index + direction;
             if (targetIndex < 0 || targetIndex >= memos.length) return;
             
-            + memos.splice(index, 1)[0];
-            const item = memos.splice(index, 1)[0]; // 確保安全調轉
+            const item = memos.splice(index, 1)[0];
             memos.splice(targetIndex, 0, item);
             renderMemos(memos);
             await saveMemosToCloud(memos);
