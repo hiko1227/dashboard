@@ -109,7 +109,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 230px;
+            max-height: 260px;
             overflow-y: auto;
             margin-top: 6px;
         }
@@ -120,7 +120,7 @@
             padding: 8px 12px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
         }
         .route-badge {
             font-size: 1.05rem;
@@ -212,7 +212,7 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 港鐵恆安站 API 實時面板 (連到站時間) -->
+            <!-- 港鐵恆安站 API 實時面板 -->
             <div class="panel">
                 <div class="panel-title">
                     <span>🚇 港鐵恆安站 (屯馬綫)</span>
@@ -223,7 +223,7 @@
                 </div>
             </div>
 
-            <!-- 九巴實時 ETA 面板 (支援自選名稱、路線及站號) -->
+            <!-- 九巴實時 ETA 面板 (支援自選名稱、路線、站號及顯示後 2 班與特別班次) -->
             <div class="panel">
                 <div class="panel-title">
                     <span>🚌 九巴實時 ETA (自選管理)</span>
@@ -237,14 +237,6 @@
                 </div>
                 <div class="transit-container" id="bus-eta-list">
                     <div style="color: #9ca3af; text-align: center; padding: 15px;">載入九巴資料中...</div>
-                </div>
-            </div>
-
-            <!-- 星象面板 -->
-            <div class="panel">
-                <div class="panel-title"><span>♑ 摩羯座 (Capricorn) 每日運勢</span></div>
-                <div id="horoscope-content" style="font-size: 1.05rem; padding-top: 4px; line-height: 1.5;">
-                    計算中...
                 </div>
             </div>
         </div>
@@ -287,28 +279,6 @@
             } catch (e) {}
         }
 
-        function updateHoroscope() {
-            const today = new Date();
-            const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-            const random = (s) => { let x = Math.sin(s) * 10000; return x - Math.floor(x); };
-            const levels = ['⭐⭐⭐ 平穩', '⭐⭐⭐⭐ 順遂', '⭐⭐⭐⭐⭐ 極佳', '⭐⭐⭐ 沉澱', '⭐⭐⭐⭐ 突破'];
-            const aspects = [
-                '今日適合專注處理細節，寫作靈感可能會喺獨處時湧現，不妨將點滴記錄低。',
-                '直覺特別敏銳，對於過往嘅回憶或人際關係會有新嘅深刻體會。',
-                '工作同創作都能夠穩步向前，適合為自己定下一個實質嘅小目標。',
-                '需要多一點耐心，今日適合靜心思考未來計劃，理清思路。',
-                '可能會接觸到一啲懷舊嘅人事物或舊有興趣，為你帶嚟意想不到嘅啟發。'
-            ];
-            const colors = ['深藍色 (沉穩)', '大地色 (踏實)', '銀灰色 (理性)', '暗紅色 (內斂)', '黑色 (專注)'];
-            document.getElementById('horoscope-content').innerHTML = `
-                <div style="display: flex; gap: 12px; margin-bottom: 8px; margin-top: 4px;">
-                    <div>運勢：<span style="color: var(--accent-yellow); font-weight: bold;">${levels[Math.floor(random(seed) * levels.length)]}</span></div>
-                    <div>幸運色：<span style="color: var(--accent-blue); font-weight: bold;">${colors[Math.floor(random(seed + 2) * colors.length)]}</span></div>
-                </div>
-                <div style="color: #d1d5db; font-size: 0.95rem;">💡 ${aspects[Math.floor(random(seed + 1) * aspects.length)]}</div>
-            `;
-        }
-
         async function fetchWeather() {
             try {
                 const tempRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
@@ -330,7 +300,7 @@
             }
         }
 
-        // 港鐵 API 抓取 (恆安站 TML-HEO) + 顯示具體到站時間
+        // 港鐵 API 抓取 (恆安站 TML-HEO)
         async function fetchMTR() {
             const container = document.getElementById('mtr-eta-list');
             try {
@@ -382,7 +352,7 @@
             }
         }
 
-        // 九巴自選路線、站號與自訂名稱管理
+        // 九巴自選路線、站號與自訂名稱管理 (含首班及後2班、特別班次備註)
         function getStoredBusRoutes() {
             const saved = localStorage.getItem('custom_bus_routes');
             if (saved) {
@@ -413,21 +383,36 @@
                     const data = await res.json();
                     const etas = data.data;
                     
-                    let timeStr = '暫無班次';
-                    let subStr = '';
+                    let etasListHtml = '';
                     if (etas && etas.length > 0) {
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
-                            const nextTime = new Date(validEtas[0].eta);
-                            const diffMin = Math.round((nextTime - new Date()) / 60000);
-                            timeStr = diffMin <= 1 ? '將到達' : `${diffMin} 分鐘`;
-                            
-                            if (validEtas[1]) {
-                                const secondTime = new Date(validEtas[1].eta);
-                                const diffMin2 = Math.round((secondTime - new Date()) / 60000);
-                                subStr = `後續: ${diffMin2 <= 1 ? '將到達' : diffMin2 + '分鐘'}`;
-                            }
+                            // 取得最多 3 班車 (首班 + 後 2 班)
+                            const topEtas = validEtas.slice(0, 3);
+                            etasListHtml = topEtas.map((e, idx) => {
+                                const nextTime = new Date(e.eta);
+                                const diffMin = Math.round((nextTime - new Date()) / 60000);
+                                const timeStr = diffMin <= 1 ? '將到達' : `${diffMin} 分鐘`;
+                                
+                                const hours = String(nextTime.getHours()).padStart(2, '0');
+                                const mins = String(nextTime.getMinutes()).padStart(2, '0');
+                                const clockTime = `${hours}:${mins}`;
+
+                                const rmk = e.rmk_tc ? `<span style="color: var(--accent-orange); font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); padding: 1px 4px; border-radius: 4px; margin-left: 4px; font-weight: bold;">${e.rmk_tc}</span>` : '';
+                                const label = idx === 0 ? '首班' : `後${idx}`;
+
+                                return `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-top: 3px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 3px;">
+                                        <span style="color: #9ca3af; font-size: 0.85rem;">${label}: <strong style="color: var(--accent-green);">${timeStr}</strong> <span style="font-size: 0.8rem;">(${clockTime})</span></span>
+                                        ${rmk}
+                                    </div>
+                                `;
+                            }).join('');
+                        } else {
+                            etasListHtml = '<div style="color: #9ca3af; font-size: 0.9rem; margin-top: 4px;">暫無班次</div>';
                         }
+                    } else {
+                        etasListHtml = '<div style="color: #9ca3af; font-size: 0.9rem; margin-top: 4px;">暫無班次</div>';
                     }
 
                     htmlContent += `
@@ -438,12 +423,11 @@
                                     <span class="route-badge">${r.route}</span>
                                     <span style="font-size: 0.8rem; color: #9ca3af;">(站: ${r.stop})</span>
                                 </div>
+                                <div style="margin-top: 2px;">
+                                    ${etasListHtml}
+                                </div>
                             </div>
-                            <div style="text-align: right; margin-right: 8px;">
-                                <div style="font-size: 1rem; font-weight: 700; color: var(--accent-green);">${timeStr}</div>
-                                <div style="font-size: 0.8rem; color: #9ca3af;">${subStr}</div>
-                            </div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem; padding: 4px;">✕</button>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem; padding: 4px; margin-left: 6px;">✕</button>
                         </div>
                     `;
                 } catch (err) {
@@ -452,8 +436,8 @@
                             <div style="flex: 1;">
                                 ${nameHtml}
                                 <div><span class="route-badge">${r.route}</span> <span style="font-size:0.8rem; color:#9ca3af;">(站: ${r.stop})</span></div>
+                                <div style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">讀取失敗</div>
                             </div>
-                            <div style="color: #f87171; font-size: 0.9rem; margin-right: 8px;">讀取失敗</div>
                             <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
                         </div>
                     `;
@@ -567,7 +551,6 @@
         setInterval(fetchBusETA, 30000);
 
         updateTime(); 
-        updateHoroscope();
         fetchWeather();
         loadMemosFromCloud(); 
         fetchMTR();
