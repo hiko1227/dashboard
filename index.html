@@ -6,7 +6,7 @@
     <style>
         :root { 
             --bg-color: #0b0f19; 
-            --card-bg: rgba(255, 255, 255, 0.05); 
+            --card-bg: rgba(255, 255, 255, 0.04); 
             --text-main: #f3f4f6; 
             --accent-blue: #60a5fa;
             --accent-green: #34d399;
@@ -28,10 +28,10 @@
         /* 自動夜間模式微調 */
         body.night-mode {
             --bg-color: #04060b;
-            --card-bg: rgba(0, 0, 0, 0.35);
+            --card-bg: rgba(0, 0, 0, 0.4);
         }
 
-        /* 頂部三欄式 Header */
+        /* 頂部三欄式 Header (帶玻璃擬態與Hover微光) */
         .top-header { 
             background: var(--card-bg); 
             padding: 10px 16px; 
@@ -42,8 +42,14 @@
             display: grid; 
             grid-template-columns: 1fr auto 1fr; 
             align-items: center; 
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .top-header:hover {
+            border-color: rgba(96, 165, 250, 0.25);
+            box-shadow: 0 6px 25px rgba(96, 165, 250, 0.1);
         }
         
         .header-left { display: flex; align-items: baseline; gap: 8px; font-size: 1.5rem; font-weight: 800; }
@@ -51,7 +57,7 @@
         .weekday-part { color: var(--accent-blue); }
 
         .header-center { text-align: center; display: flex; align-items: baseline; justify-content: center; gap: 6px; }
-        .clock { font-size: 2.2rem; font-weight: 800; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 15px rgba(251,191,36,0.2); }
+        .clock { font-size: 2.2rem; font-weight: 800; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 15px rgba(251,191,36,0.25); }
         .ampm { font-size: 0.95rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; }
 
         .header-right { display: flex; justify-content: flex-end; align-items: center; }
@@ -59,18 +65,22 @@
         /* 主網格排版 */
         .main-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 8px; max-width: 1200px; margin: auto; }
         
+        /* 🌟 強化版面板：極致玻璃擬態與 Hover 浮起微光特效 */
         .panel { 
             background: var(--card-bg); 
             padding: 10px 14px; 
             border-radius: 14px; 
             border: 1px solid rgba(255,255,255,0.08); 
-            backdrop-filter: blur(12px); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
             margin-bottom: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            transition: border-color 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .panel:hover {
-            border-color: rgba(255,255,255,0.15);
+            border-color: rgba(52, 211, 153, 0.35); /* 微微發出科技綠/藍光 */
+            box-shadow: 0 8px 30px rgba(52, 211, 153, 0.12), inset 0 1px 0 rgba(255,255,255,0.15);
+            transform: translateY(-2px); /* 輕微浮起 */
         }
 
         .panel-title { 
@@ -90,20 +100,22 @@
         .wx-temp { font-size: 2.4rem; font-weight: 800; color: var(--accent-yellow); line-height: 1; }
 
         .memo-input-box { display: flex; gap: 6px; margin-bottom: 8px; }
-        .memo-input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: border-color 0.2s; }
-        .memo-input:focus { border-color: var(--accent-green); }
-        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s; }
-        .memo-btn:hover { opacity: 0.9; }
+        .memo-input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: all 0.2s; }
+        .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 10px rgba(52,211,153,0.2); }
+        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .memo-btn:hover { opacity: 0.9; transform: scale(1.02); }
         
         .memo-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
-        .memo-item { background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid rgba(255,255,255,0.04); }
+        .memo-item { background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid rgba(255,255,255,0.04); transition: all 0.2s; }
+        .memo-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+
         .memo-actions { display: flex; gap: 4px; }
-        .memo-action-btn { background: rgba(255,255,255,0.08); color: #fff; border: none; padding: 2px 6px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .memo-action-btn { background: rgba(255,255,255,0.08); color: #fff; border: none; padding: 2px 6px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s; }
         .memo-action-btn:hover { background: rgba(255,255,255,0.2); }
         .memo-delete { color: #f87171; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 0.95rem; padding: 1px 3px; }
         
-        .refresh-memo-btn { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
-        .refresh-memo-btn:hover { background: rgba(255, 255, 255, 0.15); }
+        .refresh-memo-btn { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .refresh-memo-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255,255,255,0.3); }
 
         /* ETA 漸變動畫 */
         @keyframes fadeIn {
@@ -120,6 +132,8 @@
             overflow-y: auto;
             margin-top: 4px;
         }
+
+        /* 🌟 巴士/港鐵小卡片：加入專屬微光與Hover浮起特效 */
         .transit-card {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(251, 191, 36, 0.15); 
@@ -129,7 +143,14 @@
             justify-content: space-between;
             align-items: flex-start;
             box-shadow: inset 0 1px 3px rgba(255,255,255,0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .transit-card:hover {
+            border-color: rgba(251, 191, 36, 0.45);
+            box-shadow: 0 4px 18px rgba(251, 191, 36, 0.12), inset 0 1px 2px rgba(255,255,255,0.1);
+            transform: translateY(-1.5px);
+        }
+
         .route-badge {
             font-size: 1.05rem;
             font-weight: 800;
@@ -152,9 +173,9 @@
             color: #fff;
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
-        .transit-input:focus { border-color: var(--accent-blue); }
+        .transit-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 10px rgba(96,165,250,0.2); }
         .transit-add-btn {
             background: var(--accent-blue);
             color: #0b0f19;
@@ -165,9 +186,9 @@
             font-size: 0.95rem;
             cursor: pointer;
             white-space: nowrap;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
         }
-        .transit-add-btn:hover { opacity: 0.9; }
+        .transit-add-btn:hover { opacity: 0.9; transform: scale(1.02); }
 
         .status-pill {
             font-size: 0.7rem;
@@ -434,7 +455,7 @@
             const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
 
             return `
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(192,132,252,0.15); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(192,132,252,0.15); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
                     <div style="font-size: 0.75rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         月台 ${t.plat} 往 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
                     </div>
