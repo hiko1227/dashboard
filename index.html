@@ -377,8 +377,23 @@
                     if (etas && etas.length > 0) {
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
+                            // 1. 依時間排序
                             validEtas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                            const topEtas = validEtas.slice(0, 4);
+                            
+                            // 2. 去重邏輯：過濾掉 30 秒內且目的地相同嘅重複班次（解決首班同後1撞樣問題）
+                            const uniqueEtas = [];
+                            validEtas.forEach(e => {
+                                const eTime = new Date(e.eta).getTime();
+                                const isDuplicate = uniqueEtas.some(existing => {
+                                    const exTime = new Date(existing.eta).getTime();
+                                    return Math.abs(eTime - exTime) < 30000 && existing.dest_tc === e.dest_tc;
+                                });
+                                if (!isDuplicate) {
+                                    uniqueEtas.push(e);
+                                }
+                            });
+
+                            const topEtas = uniqueEtas.slice(0, 4);
                             
                             etasListHtml = topEtas.map((e, idx) => {
                                 const nextTime = new Date(e.eta);
@@ -391,10 +406,10 @@
 
                                 const label = idx === 0 ? '首班' : `後${idx}`;
                                 
-                                // 修正：排除「原定班次」等普通提示，只有真正特別班次先著黃燈
+                                // 3. 修正特別班次判斷：必須 service_type > 1 或者備註明確含「特別/特班」
                                 const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc.trim() : '';
-                                const isNormalRemark = (rmkText === '原定班次' || rmkText === '');
-                                const isSpecial = (e.service_type && e.service_type > 1) || (!isNormalRemark && rmkText.includes('特別'));
+                                const isSpecial = (e.service_type && e.service_type > 1) || 
+                                                  (rmkText !== '' && rmkText !== '原定班次' && (rmkText.includes('特別') || rmkText.includes('特班')));
                                 
                                 const specialClass = isSpecial ? 'pill-active-special' : 'pill-dim';
                                 const normalClass = !isSpecial ? 'pill-active-normal' : 'pill-dim';
