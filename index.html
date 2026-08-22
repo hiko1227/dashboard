@@ -198,16 +198,20 @@
 
         <!-- 右邊欄 -->
         <div>
-            <!-- 九巴實時 ETA 面板 -->
+            <!-- 巴士實時 ETA 面板 (支援九巴 & 城巴) -->
             <div class="panel">
                 <div class="transit-input-box">
-                    <input type="text" id="bus-route-input" class="transit-input" style="width: 65px; text-align: center;" placeholder="路線">
-                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 80px; text-align: center;" placeholder="站ID" value="003345">
+                    <select id="bus-co-select" class="transit-input" style="width: 75px; text-align: center; background: rgba(0,0,0,0.5); color: #fff;">
+                        <option value="KMB">九巴</option>
+                        <option value="CTB">城巴</option>
+                    </select>
+                    <input type="text" id="bus-route-input" class="transit-input" style="width: 60px; text-align: center;" placeholder="路線">
+                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
                     <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
                     <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
                 </div>
                 <div class="transit-container" id="bus-eta-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入九巴資料中...</div>
+                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入巴士資料中...</div>
                 </div>
             </div>
 
@@ -289,9 +293,7 @@
                     let gridHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">';
                     
                     for (let i = 0; i < 2; i++) {
-                        // 左邊：屯門方向 (DOWN)
                         gridHtml += renderMtrCell(downTrains[i], '屯門', destMap);
-                        // 右邊：烏溪沙方向 (UP)
                         gridHtml += renderMtrCell(upTrains[i], '烏溪沙', destMap);
                     }
                     gridHtml += '</div>';
@@ -330,15 +332,15 @@
             `;
         }
 
-        // 九巴自選路線管理
+        // 巴士自選路線管理 (支援九巴 & 城巴)
         function getStoredBusRoutes() {
             const saved = localStorage.getItem('custom_bus_routes');
             if (saved) {
                 try { return JSON.parse(saved); } catch (e) {}
             }
             return [
-                { route: '85K', stop: '003345', name: '錦鞍苑往沙田' },
-                { route: '681', stop: '003345', name: '錦鞍苑往港島' }
+                { route: '85K', stop: '003345', name: '錦鞍苑往沙田', co: 'KMB' },
+                { route: '681', stop: '003345', name: '錦鞍苑往港島', co: 'KMB' }
             ];
         }
 
@@ -354,12 +356,15 @@
             let htmlContent = '';
             for (let i = 0; i < routes.length; i++) {
                 let r = routes[i];
+                let company = r.co || 'KMB';
                 
                 try {
                     let etas = [];
-                    for (let st = 1; st <= 3; st++) {
+                    
+                    if (company === 'CTB') {
+                        // 城巴 API 抓取
                         try {
-                            const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
+                            const res = await fetch(`https://rt.data.gov.hk/v1/transport/citybus/eta/CTB/${r.stop}/${r.route}`);
                             if (res.ok) {
                                 const data = await res.json();
                                 if (data && data.data) {
@@ -371,16 +376,32 @@
                                 }
                             }
                         } catch (err) {}
+                    } else {
+                        // 九巴 API 抓取 (保持不變)
+                        for (let st = 1; st <= 3; st++) {
+                            try {
+                                const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    if (data && data.data) {
+                                        if (Array.isArray(data.data)) {
+                                            etas = etas.concat(data.data);
+                                        } else {
+                                            etas.push(data.data);
+                                        }
+                                    }
+                                }
+                            } catch (err) {}
+                        }
                     }
                     
                     let etasListHtml = '';
                     if (etas && etas.length > 0) {
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
-                            // 1. 依時間排序
                             validEtas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
                             
-                            // 2. 嚴格去重：60秒內的相同時間班次當作同一班，避免重疊
+                            // 去重邏輯 (60秒內相同時間視為重複)
                             const uniqueEtas = [];
                             validEtas.forEach(e => {
                                 const eTime = new Date(e.eta).getTime();
@@ -393,7 +414,6 @@
                                 }
                             });
 
-                            // 只取首 3 班
                             const topEtas = uniqueEtas.slice(0, 3);
                             
                             etasListHtml = topEtas.map((e, idx) => {
@@ -405,10 +425,8 @@
                                 const mins = String(nextTime.getMinutes()).padStart(2, '0');
                                 const clockTime = `${hours}:${mins}`;
 
-                                // 改為純數字 1, 2, 3
                                 const label = `${idx + 1}`;
                                 
-                                // 3. 特別班次判定
                                 const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc.trim() : '';
                                 const isSpecial = (e.service_type && e.service_type > 1) || 
                                                   (rmkText !== '' && rmkText !== '原定班次' && (rmkText.includes('特別') || rmkText.includes('特班') || rmkText.includes('特別班次')));
@@ -433,12 +451,15 @@
                         etasListHtml = '<div style="color: #9ca3af; font-size: 0.95rem; margin-top: 2px;">暫無班次</div>';
                     }
 
+                    const coBadge = company === 'CTB' ? '<span style="font-size: 0.75rem; background: rgba(96,165,250,0.15); color: var(--accent-blue); padding: 1px 4px; border-radius: 4px; border: 1px solid rgba(96,165,250,0.3); font-weight: bold;">城巴</span>' : '';
+
                     htmlContent += `
                         <div class="transit-card">
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span class="route-badge">${r.route}</span>
+                                        ${coBadge}
                                         ${r.name ? `<span style="font-size: 1.05rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                                     </div>
                                     <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem; padding: 0;">✕</button>
@@ -468,17 +489,19 @@
         }
 
         function addBusRoute() {
+            const coSelect = document.getElementById('bus-co-select');
             const routeInput = document.getElementById('bus-route-input');
             const stopInput = document.getElementById('bus-stop-input');
             const nameInput = document.getElementById('bus-name-input');
             
+            const coVal = coSelect.value;
             const routeVal = routeInput.value.trim().toUpperCase();
             const stopVal = stopInput.value.trim() || '003345';
             const nameVal = nameInput.value.trim();
 
             if (!routeVal) return;
             let routes = getStoredBusRoutes();
-            routes.push({ route: routeVal, stop: stopVal, name: nameVal });
+            routes.push({ route: routeVal, stop: stopVal, name: nameVal, co: coVal });
             localStorage.setItem('custom_bus_routes', JSON.stringify(routes));
             
             routeInput.value = '';
