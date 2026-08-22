@@ -76,7 +76,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 440px;
+            max-height: 480px;
             overflow-y: auto;
             margin-top: 4px;
         }
@@ -214,7 +214,7 @@
             <!-- 港鐵恆安站 API 實時面板 (左屯門 右烏溪沙 2x2 格仔) -->
             <div class="panel" style="padding: 6px 10px;">
                 <div class="transit-container" id="mtr-eta-list" style="margin-top: 0; max-height: none;">
-                    <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 0.95rem;">載入港鐵實時資料中...</div>
+                    <div style="color: #9ca3af; text-align: center; padding: 4px; font-size: 0.9rem;">載入港鐵實時資料中...</div>
                 </div>
             </div>
         </div>
@@ -322,9 +322,9 @@
                     <div style="font-size: 0.78rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         月台 ${t.plat} 往 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; font-size: 0.95rem;">
                         <span style="color: var(--accent-green); font-weight: bold;">${timeText}</span>
-                        <span style="color: var(--accent-yellow); font-weight: bold;">(${clockTime})</span>
+                        <span style="color: var(--accent-yellow); font-weight: bold;">${clockTime}</span>
                     </div>
                 </div>
             `;
@@ -356,10 +356,23 @@
                 let r = routes[i];
                 
                 try {
-                    // 改為抓取整個站點所有班次以確保涵蓋所有 service_type（特別班次），避免與官方 App 時間相差
-                    const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}`);
-                    const data = await res.json();
-                    const etas = (data.data || []).filter(e => e.route.toUpperCase() === r.route.toUpperCase());
+                    // 同時查詢 service_type 1, 2, 3 確保涵蓋常規及特別班次
+                    let etas = [];
+                    for (let st = 1; st <= 3; st++) {
+                        try {
+                            const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data && data.data) {
+                                    if (Array.isArray(data.data)) {
+                                        etas = etas.concat(data.data);
+                                    } else {
+                                        etas.push(data.data);
+                                    }
+                                }
+                            }
+                        } catch (e) {}
+                    }
                     
                     let etasListHtml = '';
                     if (etas && etas.length > 0) {
@@ -379,7 +392,7 @@
 
                                 const label = idx === 0 ? '首班' : `後${idx}`;
                                 
-                                // 特別 / 普通 狀態燈判斷 (支援 service_type > 1 或 rmk_tc)
+                                // 特別 / 普通 狀態燈判斷
                                 const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc : '';
                                 const isSpecial = (e.service_type && e.service_type > 1) || rmkText !== '';
                                 
