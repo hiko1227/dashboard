@@ -380,20 +380,21 @@
                             // 1. 依時間排序
                             validEtas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
                             
-                            // 2. 去重邏輯：過濾掉 30 秒內且目的地相同嘅重複班次（解決首班同後1撞樣問題）
+                            // 2. 嚴格去重：60秒內的相同時間班次當作同一班，避免重疊
                             const uniqueEtas = [];
                             validEtas.forEach(e => {
                                 const eTime = new Date(e.eta).getTime();
                                 const isDuplicate = uniqueEtas.some(existing => {
                                     const exTime = new Date(existing.eta).getTime();
-                                    return Math.abs(eTime - exTime) < 30000 && existing.dest_tc === e.dest_tc;
+                                    return Math.abs(eTime - exTime) < 60000;
                                 });
                                 if (!isDuplicate) {
                                     uniqueEtas.push(e);
                                 }
                             });
 
-                            const topEtas = uniqueEtas.slice(0, 4);
+                            // 只取首 3 班
+                            const topEtas = uniqueEtas.slice(0, 3);
                             
                             etasListHtml = topEtas.map((e, idx) => {
                                 const nextTime = new Date(e.eta);
@@ -404,22 +405,22 @@
                                 const mins = String(nextTime.getMinutes()).padStart(2, '0');
                                 const clockTime = `${hours}:${mins}`;
 
-                                const label = idx === 0 ? '首班' : `後${idx}`;
+                                // 改為純數字 1, 2, 3
+                                const label = `${idx + 1}`;
                                 
-                                // 3. 修正特別班次判斷：必須 service_type > 1 或者備註明確含「特別/特班」
+                                // 3. 特別班次判定
                                 const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc.trim() : '';
                                 const isSpecial = (e.service_type && e.service_type > 1) || 
-                                                  (rmkText !== '' && rmkText !== '原定班次' && (rmkText.includes('特別') || rmkText.includes('特班')));
+                                                  (rmkText !== '' && rmkText !== '原定班次' && (rmkText.includes('特別') || rmkText.includes('特班') || rmkText.includes('特別班次')));
                                 
                                 const specialClass = isSpecial ? 'pill-active-special' : 'pill-dim';
                                 const normalClass = !isSpecial ? 'pill-active-normal' : 'pill-dim';
-                                const displayRmk = isSpecial ? (rmkText ? ': ' + rmkText : ': 特別班次') : '';
 
                                 return `
                                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2px;">
                                         <span style="color: #9ca3af;">${label}: <strong style="color: var(--accent-green);">${timeStr}</strong> <span style="font-size: 0.8rem;">(${clockTime})</span></span>
                                         <div style="display: flex; gap: 3px; align-items: center;">
-                                            <span class="status-pill ${specialClass}">特別${displayRmk}</span>
+                                            <span class="status-pill ${specialClass}">特別</span>
                                             <span class="status-pill ${normalClass}">普通</span>
                                         </div>
                                     </div>
