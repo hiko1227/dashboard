@@ -123,16 +123,45 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        .rmk-badge {
+
+        /* 狀態燈標籤 (特別 / 普通) */
+        .status-pill {
             font-size: 0.75rem;
-            padding: 1px 5px;
+            padding: 1px 6px;
             border-radius: 4px;
             font-weight: bold;
-            display: inline-block;
-            margin-left: 6px;
-            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .pill-active-special {
+            background: rgba(251, 191, 36, 0.25);
             color: var(--accent-yellow);
-            border: 1px solid rgba(251, 191, 36, 0.4);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+        .pill-active-normal {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--accent-green);
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+        .pill-dim {
+            background: rgba(255, 255, 255, 0.03);
+            color: #6b7280;
+            opacity: 0.4;
+        }
+
+        /* 港鐵 4個正方形網格 */
+        .mtr-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .mtr-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
     </style>
 </head>
@@ -198,7 +227,7 @@
                 </div>
             </div>
 
-            <!-- 港鐵恆安站 API 實時面板 -->
+            <!-- 港鐵恆安站 API 實時面板 (4個正方形網格) -->
             <div class="panel">
                 <div class="transit-container" id="mtr-eta-list" style="margin-top: 0;">
                     <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入港鐵實時資料中...</div>
@@ -256,7 +285,7 @@
             }
         }
 
-        // 港鐵 API 抓取 (恆安站 TML-HEO)
+        // 港鐵 API 抓取 (恆安站 TML-HEO) - 4個正方形格仔排版
         async function fetchMTR() {
             const container = document.getElementById('mtr-eta-list');
             try {
@@ -269,40 +298,55 @@
                         return;
                     }
 
-                    const upTrains = stationData.UP || [];
-                    const downTrains = stationData.DOWN || [];
+                    let allTrains = [];
+                    if (stationData.UP) {
+                        stationData.UP.forEach(t => allTrains.push({ ...t, dir: 'UP' }));
+                    }
+                    if (stationData.DOWN) {
+                        stationData.DOWN.forEach(t => allTrains.push({ ...t, dir: 'DOWN' }));
+                    }
+
+                    allTrains.forEach(t => {
+                        t.parsedTime = new Date(t.time.replace(/-/g, '/'));
+                    });
+                    allTrains.sort((a, b) => a.parsedTime - b.parsedTime);
+
+                    const topTrains = allTrains.slice(0, 4);
                     const destMap = { 'WKS': '烏溪沙', 'MOS': '馬鞍山', 'TUM': '屯門', 'HUH': '紅磡', 'ETS': '尖東', 'KAT': '啟德', 'DIH': '鑽石山' };
 
-                    let html = '';
-                    const renderTrains = (trains) => {
-                        if (trains.length === 0) return '';
-                        return trains.slice(0, 2).map(t => {
-                            const destName = destMap[t.dest] || t.dest;
-                            const trainTime = new Date(t.time.replace(/-/g, '/'));
-                            const diffMin = Math.round((trainTime - new Date()) / 60000);
-                            
-                            const trainHours = String(trainTime.getHours()).padStart(2, '0');
-                            const trainMinutes = String(trainTime.getMinutes()).padStart(2, '0');
-                            const clockTime = `${trainHours}:${trainMinutes}`;
-
-                            const timeText = diffMin <= 0 ? `即將到達 (${clockTime})` : `${diffMin} 分鐘 (${clockTime})`;
-                            const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
-
-                            return `
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 3px 6px; border-radius: 5px; margin-bottom: 2px; font-size: 1rem;">
-                                    <span>往 <b style="color: ${destColor};">${destName}</b> <span style="font-size:0.85rem; color:#9ca3af;">(L${t.plat})</span></span>
-                                    <span style="color: var(--accent-green); font-weight: bold;">${timeText}</span>
-                                </div>
-                            `;
-                        }).join('');
-                    };
-
-                    html += renderTrains(upTrains);
-                    html += renderTrains(downTrains);
-                    if (!html) {
-                        html = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">暫無班次</div>';
+                    if (topTrains.length === 0) {
+                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">暫無班次</div>';
+                        return;
                     }
-                    container.innerHTML = html;
+
+                    let gridHtml = '<div class="mtr-grid">';
+                    topTrains.forEach(t => {
+                        const destName = destMap[t.dest] || t.dest;
+                        const diffMin = Math.round((t.parsedTime - new Date()) / 60000);
+                        
+                        const trainHours = String(t.parsedTime.getHours()).padStart(2, '0');
+                        const trainMinutes = String(t.parsedTime.getMinutes()).padStart(2, '0');
+                        const clockTime = `${trainHours}:${trainMinutes}`;
+
+                        const timeText = diffMin <= 0 ? '即將到達' : `${diffMin} 分鐘`;
+                        const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
+
+                        gridHtml += `
+                            <div class="mtr-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                    <span style="color: #9ca3af;">月台 ${t.plat}</span>
+                                    <span style="color: var(--accent-green); font-weight: bold; font-size: 0.95rem;">${timeText}</span>
+                                </div>
+                                <div style="margin: 4px 0;">
+                                    <div style="font-size: 0.8rem; color: #9ca3af; line-height: 1;">往</div>
+                                    <div style="font-size: 1.1rem; font-weight: 800; color: ${destColor};">${destName}</div>
+                                </div>
+                                <div style="text-align: right; font-size: 0.8rem; color: #9ca3af;">${clockTime}</div>
+                            </div>
+                        `;
+                    });
+                    gridHtml += '</div>';
+                    container.innerHTML = gridHtml;
                 } else {
                     container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 6px; font-size: 1rem;">港鐵系統維護中</div>';
                 }
@@ -345,7 +389,6 @@
                     if (etas && etas.length > 0) {
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
-                            // 可顯示高達 4 班巴士
                             const topEtas = validEtas.slice(0, 4);
                             etasListHtml = topEtas.map((e, idx) => {
                                 const nextTime = new Date(e.eta);
@@ -358,13 +401,20 @@
 
                                 const label = idx === 0 ? '首班' : `後${idx}`;
                                 
-                                // 特別班次標記邏輯：如果 rmk_tc 有字就顯示 API 備註，冇就常規
+                                // 特別 / 普通 標籤判斷
                                 const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc : '';
+                                const isSpecial = rmkText !== '';
+                                
+                                const specialClass = isSpecial ? 'pill-active-special' : 'pill-dim';
+                                const normalClass = !isSpecial ? 'pill-active-normal' : 'pill-dim';
 
                                 return `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.98rem; margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2px;">
-                                        <span style="color: #9ca3af;">${label}: <strong style="color: var(--accent-green);">${timeStr}</strong> <span style="font-size: 0.85rem;">(${clockTime})</span></span>
-                                        ${rmkText ? `<span class="rmk-badge">${rmkText}</span>` : ''}
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2px;">
+                                        <span style="color: #9ca3af;">${label}: <strong style="color: var(--accent-green);">${timeStr}</strong> <span style="font-size: 0.8rem;">(${clockTime})</span></span>
+                                        <div style="display: flex; gap: 3px; align-items: center;">
+                                            <span class="status-pill ${specialClass}">特別${rmkText ? ': ' + rmkText : ''}</span>
+                                            <span class="status-pill ${normalClass}">普通</span>
+                                        </div>
                                     </div>
                                 `;
                             }).join('');
