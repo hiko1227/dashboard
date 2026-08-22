@@ -76,7 +76,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 380px;
+            max-height: 440px;
             overflow-y: auto;
             margin-top: 4px;
         }
@@ -126,8 +126,8 @@
 
         /* 狀態燈標籤 (特別 / 普通) */
         .status-pill {
-            font-size: 0.75rem;
-            padding: 1px 6px;
+            font-size: 0.7rem;
+            padding: 1px 5px;
             border-radius: 4px;
             font-weight: bold;
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -145,23 +145,7 @@
         .pill-dim {
             background: rgba(255, 255, 255, 0.03);
             color: #6b7280;
-            opacity: 0.4;
-        }
-
-        /* 港鐵 4個正方形網格 */
-        .mtr-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-        }
-        .mtr-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            opacity: 0.35;
         }
     </style>
 </head>
@@ -227,10 +211,10 @@
                 </div>
             </div>
 
-            <!-- 港鐵恆安站 API 實時面板 (4個正方形網格) -->
-            <div class="panel">
-                <div class="transit-container" id="mtr-eta-list" style="margin-top: 0;">
-                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入港鐵實時資料中...</div>
+            <!-- 港鐵恆安站 API 實時面板 (左屯門 右烏溪沙 2x2 格仔) -->
+            <div class="panel" style="padding: 6px 10px;">
+                <div class="transit-container" id="mtr-eta-list" style="margin-top: 0; max-height: none;">
+                    <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 0.95rem;">載入港鐵實時資料中...</div>
                 </div>
             </div>
         </div>
@@ -285,7 +269,7 @@
             }
         }
 
-        // 港鐵 API 抓取 (恆安站 TML-HEO) - 4個正方形格仔排版
+        // 港鐵 API 抓取 (恆安站 TML-HEO) - 左屯門 右烏溪沙 2x2 格仔
         async function fetchMTR() {
             const container = document.getElementById('mtr-eta-list');
             try {
@@ -294,65 +278,56 @@
                 if (json.status === 1 && json.data) {
                     const stationData = json.data['TML-HEO'];
                     if (!stationData) {
-                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">暫無列車資料</div>';
+                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 4px; font-size: 0.9rem;">暫無列車資料</div>';
                         return;
                     }
 
-                    let allTrains = [];
-                    if (stationData.UP) {
-                        stationData.UP.forEach(t => allTrains.push({ ...t, dir: 'UP' }));
-                    }
-                    if (stationData.DOWN) {
-                        stationData.DOWN.forEach(t => allTrains.push({ ...t, dir: 'DOWN' }));
-                    }
-
-                    allTrains.forEach(t => {
-                        t.parsedTime = new Date(t.time.replace(/-/g, '/'));
-                    });
-                    allTrains.sort((a, b) => a.parsedTime - b.parsedTime);
-
-                    const topTrains = allTrains.slice(0, 4);
+                    const downTrains = (stationData.DOWN || []).slice(0, 2); // 屯門方向
+                    const upTrains = (stationData.UP || []).slice(0, 2);     // 烏溪沙方向
                     const destMap = { 'WKS': '烏溪沙', 'MOS': '馬鞍山', 'TUM': '屯門', 'HUH': '紅磡', 'ETS': '尖東', 'KAT': '啟德', 'DIH': '鑽石山' };
 
-                    if (topTrains.length === 0) {
-                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1rem;">暫無班次</div>';
-                        return;
+                    let gridHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">';
+                    
+                    for (let i = 0; i < 2; i++) {
+                        // 左邊：屯門方向 (DOWN)
+                        gridHtml += renderMtrCell(downTrains[i], '屯門', destMap);
+                        // 右邊：烏溪沙方向 (UP)
+                        gridHtml += renderMtrCell(upTrains[i], '烏溪沙', destMap);
                     }
-
-                    let gridHtml = '<div class="mtr-grid">';
-                    topTrains.forEach(t => {
-                        const destName = destMap[t.dest] || t.dest;
-                        const diffMin = Math.round((t.parsedTime - new Date()) / 60000);
-                        
-                        const trainHours = String(t.parsedTime.getHours()).padStart(2, '0');
-                        const trainMinutes = String(t.parsedTime.getMinutes()).padStart(2, '0');
-                        const clockTime = `${trainHours}:${trainMinutes}`;
-
-                        const timeText = diffMin <= 0 ? '即將到達' : `${diffMin} 分鐘`;
-                        const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
-
-                        gridHtml += `
-                            <div class="mtr-card">
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-                                    <span style="color: #9ca3af;">月台 ${t.plat}</span>
-                                    <span style="color: var(--accent-green); font-weight: bold; font-size: 0.95rem;">${timeText}</span>
-                                </div>
-                                <div style="margin: 4px 0;">
-                                    <div style="font-size: 0.8rem; color: #9ca3af; line-height: 1;">往</div>
-                                    <div style="font-size: 1.1rem; font-weight: 800; color: ${destColor};">${destName}</div>
-                                </div>
-                                <div style="text-align: right; font-size: 0.8rem; color: #9ca3af;">${clockTime}</div>
-                            </div>
-                        `;
-                    });
                     gridHtml += '</div>';
                     container.innerHTML = gridHtml;
                 } else {
-                    container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 6px; font-size: 1rem;">港鐵系統維護中</div>';
+                    container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 4px; font-size: 0.9rem;">港鐵系統維護中</div>';
                 }
             } catch (e) {
-                container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 6px; font-size: 1rem;">港鐵連線失敗</div>';
+                container.innerHTML = '<div style="color: #f87171; text-align: center; padding: 4px; font-size: 0.9rem;">港鐵連線失敗</div>';
             }
+        }
+
+        function renderMtrCell(t, defaultDestName, destMap) {
+            if (!t) {
+                return `<div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; padding: 5px 8px; font-size: 0.85rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 40px;">暫無班次</div>`;
+            }
+            const destName = destMap[t.dest] || t.dest || defaultDestName;
+            const trainTime = new Date(t.time.replace(/-/g, '/'));
+            const diffMin = Math.round((trainTime - new Date()) / 60000);
+            const trainHours = String(trainTime.getHours()).padStart(2, '0');
+            const trainMinutes = String(trainTime.getMinutes()).padStart(2, '0');
+            const clockTime = `${trainHours}:${trainMinutes}`;
+            const timeText = diffMin <= 0 ? '即將到達' : `${diffMin} 分鐘`;
+            const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
+
+            return `
+                <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 4px 7px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="font-size: 0.78rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        月台 ${t.plat} 往 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; font-size: 0.9rem;">
+                        <span style="color: var(--accent-green); font-weight: bold;">${timeText}</span>
+                        <span style="color: var(--accent-yellow); font-weight: bold;">(${clockTime})</span>
+                    </div>
+                </div>
+            `;
         }
 
         // 九巴自選路線管理
@@ -381,15 +356,18 @@
                 let r = routes[i];
                 
                 try {
-                    const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/1`);
+                    // 改為抓取整個站點所有班次以確保涵蓋所有 service_type（特別班次），避免與官方 App 時間相差
+                    const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}`);
                     const data = await res.json();
-                    const etas = data.data;
+                    const etas = (data.data || []).filter(e => e.route.toUpperCase() === r.route.toUpperCase());
                     
                     let etasListHtml = '';
                     if (etas && etas.length > 0) {
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
+                            validEtas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
                             const topEtas = validEtas.slice(0, 4);
+                            
                             etasListHtml = topEtas.map((e, idx) => {
                                 const nextTime = new Date(e.eta);
                                 const diffMin = Math.round((nextTime - new Date()) / 60000);
@@ -401,18 +379,19 @@
 
                                 const label = idx === 0 ? '首班' : `後${idx}`;
                                 
-                                // 特別 / 普通 標籤判斷
+                                // 特別 / 普通 狀態燈判斷 (支援 service_type > 1 或 rmk_tc)
                                 const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc : '';
-                                const isSpecial = rmkText !== '';
+                                const isSpecial = (e.service_type && e.service_type > 1) || rmkText !== '';
                                 
                                 const specialClass = isSpecial ? 'pill-active-special' : 'pill-dim';
                                 const normalClass = !isSpecial ? 'pill-active-normal' : 'pill-dim';
+                                const displayRmk = rmkText ? rmkText : (e.service_type > 1 ? '特別班次' : '');
 
                                 return `
                                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2px;">
                                         <span style="color: #9ca3af;">${label}: <strong style="color: var(--accent-green);">${timeStr}</strong> <span style="font-size: 0.8rem;">(${clockTime})</span></span>
                                         <div style="display: flex; gap: 3px; align-items: center;">
-                                            <span class="status-pill ${specialClass}">特別${rmkText ? ': ' + rmkText : ''}</span>
+                                            <span class="status-pill ${specialClass}">特別${displayRmk ? ': ' + displayRmk : ''}</span>
                                             <span class="status-pill ${normalClass}">普通</span>
                                         </div>
                                     </div>
