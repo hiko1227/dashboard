@@ -76,7 +76,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 480px;
+            max-height: 500px;
             overflow-y: auto;
             margin-top: 4px;
         }
@@ -356,8 +356,8 @@
                 let r = routes[i];
                 
                 try {
-                    // 同時查詢 service_type 1, 2, 3 確保涵蓋常規及特別班次
                     let etas = [];
+                    // 用穩陣嘅 Stop + Route + Service Type 逐個查詢 (支援 1, 2, 3 服務類型以獲取特別班次)
                     for (let st = 1; st <= 3; st++) {
                         try {
                             const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
@@ -371,7 +371,7 @@
                                     }
                                 }
                             }
-                        } catch (e) {}
+                        } catch (err) {}
                     }
                     
                     let etasListHtml = '';
