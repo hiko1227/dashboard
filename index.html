@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Tablet Dashboard (遠視單欄特大版)</title>
+    <title>3008 Tablet Dashboard (橫向大螢幕優化版)</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -20,51 +20,25 @@
             background-color: var(--bg-color); 
             color: var(--text-main); 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            padding: 8px; 
+            padding: 12px; 
             margin: 0; 
-            font-size: 1.4rem; /* 全面推大基礎字體 */
-            transition: background-color 0.5s ease;
+            font-size: 1.3rem;
             -webkit-font-smoothing: antialiased;
         }
 
         body.night-mode {
             --bg-color: #04060b;
-            --card-bg: rgba(0, 0, 0, 0.55);
+            --card-bg: rgba(0, 0, 0, 0.6);
         }
 
-        /* 主容器改為單欄，全螢幕置中 */
+        /* 打橫專用：左右兩欄大格網格排版 (2x2 Grid) */
         .dashboard-container {
-            max-width: 800px;
+            max-width: 1350px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 14px;
         }
-
-        /* 頂部 Header 調整為單欄大卡片 */
-        .top-header { 
-            background: var(--card-bg); 
-            padding: 16px 20px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(255,255,255,0.15); 
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-            text-align: center;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-        }
-        
-        .header-top-row { display: flex; justify-content: space-between; width: 100%; align-items: center; font-size: 1.5rem; font-weight: 800; }
-        .date-part { color: var(--text-main); }
-        .weekday-part { color: var(--accent-blue); }
-
-        .header-clock-row { display: flex; align-items: baseline; justify-content: center; gap: 12px; }
-        .clock { font-size: 4rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 20px rgba(251,191,36,0.4); }
-        .ampm { font-size: 1.4rem; font-weight: 800; color: var(--accent-orange); text-transform: uppercase; }
-
-        .header-holiday-row { font-size: 1.1rem; color: #9ca3af; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; padding-top: 8px; }
 
         /* 通用面板樣式 */
         .panel { 
@@ -74,6 +48,9 @@
             border: 1px solid rgba(52, 211, 153, 0.3); 
             backdrop-filter: blur(16px); 
             box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .panel-title { 
@@ -87,65 +64,109 @@
             justify-content: space-between; 
             align-items: center; 
         }
+
+        /* 頂部 Header 佔左上 */
+        .top-header { 
+            background: var(--card-bg); 
+            padding: 16px 20px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+        }
         
+        .header-top-row { display: flex; justify-content: space-between; width: 100%; align-items: center; font-size: 1.4rem; font-weight: 800; }
+        .date-part { color: var(--text-main); }
+        .weekday-part { color: var(--accent-blue); }
+
+        .header-clock-row { display: flex; align-items: baseline; justify-content: center; gap: 12px; }
+        .clock { font-size: 4.2rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 20px rgba(251,191,36,0.4); }
+        .ampm { font-size: 1.4rem; font-weight: 800; color: var(--accent-orange); text-transform: uppercase; }
+        .header-holiday-row { font-size: 1.1rem; color: #9ca3af; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; padding-top: 8px; text-align: center; }
+
         /* 天氣資訊 */
-        .wx-box { display: flex; align-items: center; justify-content: space-between; }
-        .wx-temp { font-size: 3.8rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
+        .wx-box { display: flex; align-items: center; justify-content: space-around; padding: 10px 0; }
+        .wx-temp { font-size: 4rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
 
         @keyframes warningBlink {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
-        .warning-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .warning-container { display: flex; flex-wrap: gap; gap: 8px; margin-top: 10px; }
         .warning-badge {
             background: rgba(248, 113, 113, 0.3);
             color: var(--accent-red);
             border: 1px solid rgba(248, 113, 113, 0.7);
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 1.2rem;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 1.1rem;
             font-weight: bold;
             animation: warningBlink 1.5s infinite ease-in-out;
+        }
+
+        /* 港鐵打橫左右行對比排版 */
+        .mtr-grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .mtr-direction-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(192,132,252,0.3);
+            border-radius: 12px;
+            padding: 10px;
+        }
+        .mtr-dir-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 4px;
         }
 
         /* 交通與備忘容器 */
         .transit-container, .memo-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: none; /* 移除高度限制，確保所有港鐵班次睇晒 */
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
         }
 
         .transit-card, .memo-item {
             background: rgba(0, 0, 0, 0.45);
             border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 12px;
-            padding: 12px 16px;
+            border-radius: 10px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .route-badge {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 900;
             color: var(--accent-yellow);
             background: rgba(251, 191, 36, 0.25);
-            padding: 4px 12px;
-            border-radius: 8px;
+            padding: 2px 10px;
+            border-radius: 6px;
             border: 1px solid rgba(251, 191, 36, 0.5);
         }
 
-        .transit-input-box, .memo-input-box { display: flex; gap: 10px; margin-bottom: 12px; }
-        .transit-input, .memo-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.25); padding: 10px 14px; border-radius: 10px; color: #fff; font-size: 1.2rem; outline: none; }
-        .transit-add-btn, .memo-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 20px; border-radius: 10px; font-weight: 900; font-size: 1.2rem; cursor: pointer; }
+        .transit-input-box, .memo-input-box { display: flex; gap: 8px; margin-bottom: 10px; }
+        .transit-input, .memo-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.25); padding: 8px 12px; border-radius: 8px; color: #fff; font-size: 1.1rem; outline: none; }
+        .transit-add-btn, .memo-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 16px; border-radius: 8px; font-weight: 900; font-size: 1.1rem; cursor: pointer; }
         .memo-btn { background: var(--accent-green); }
 
         .status-pill {
-            font-size: 0.95rem;
-            padding: 4px 10px;
-            border-radius: 6px;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 4px;
             font-weight: bold;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -153,13 +174,13 @@
         .pill-active-normal { background: rgba(52, 211, 153, 0.3); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.6); }
         .pill-dim { background: rgba(255, 255, 255, 0.05); color: #6b7280; opacity: 0.4; }
 
-        .refresh-memo-btn { background: rgba(255, 255, 255, 0.12); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.25); padding: 6px 14px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: bold; }
+        .refresh-memo-btn { background: rgba(255, 255, 255, 0.12); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.25); padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
-        <!-- 頂部置中大時鐘與日期 -->
+        <!-- 1. 左上：時鐘與假期 -->
         <div class="top-header">
             <div class="header-top-row">
                 <span class="date-part" id="date-part">--</span>
@@ -169,20 +190,18 @@
                 <span class="clock" id="clock">00:00:00</span>
                 <span class="ampm" id="ampm">--</span>
             </div>
-            <div class="header-holiday-row" id="holiday-countdown">
-                計算假期中...
-            </div>
+            <div class="header-holiday-row" id="holiday-countdown">計算假期中...</div>
         </div>
 
-        <!-- 天氣資訊面板 -->
+        <!-- 2. 右上：天氣資訊 -->
         <div class="panel">
             <div class="panel-title"><span>☀️ 天氣資訊</span></div>
             <div class="wx-box">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 64px; height: 64px; display: none;" onerror="this.style.display='none'">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 56px; height: 56px; display: none;" onerror="this.style.display='none'">
                     <span class="wx-temp" id="current-temp">--°C</span>
                 </div>
-                <div style="text-align: right; font-size: 1.3rem; font-weight: 700;">
+                <div style="text-align: right; font-size: 1.2rem; font-weight: 700;">
                     <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
                     <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
                 </div>
@@ -190,40 +209,45 @@
             <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
         </div>
 
-        <!-- 港鐵恆安站面板 (放上黎方便遠睇) -->
+        <!-- 3. 左下：港鐵恆安站 (打橫左右分栏：屯門方向 vs 烏溪沙方向) -->
         <div class="panel">
             <div class="panel-title"><span>🚇 港鐵恆安站 (屯馬線)</span></div>
-            <div class="transit-container" id="mtr-eta-list">
-                <div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.2rem;">載入港鐵實時資料中...</div>
+            <div class="mtr-grid-container" id="mtr-eta-list">
+                <div style="color: #9ca3af; text-align: center; padding: 10px; grid-column: span 2;">載入港鐵資料中...</div>
             </div>
         </div>
 
-        <!-- 九巴實時 ETA 面板 -->
+        <!-- 4. 右下：九巴實時到站 + 雲端備忘 -->
         <div class="panel">
-            <div class="panel-title"><span>🚌 九巴實時到站</span></div>
+            <div class="panel-title">
+                <span>🚌 九巴實時到站</span>
+                <span style="font-size: 0.9rem; color: #9ca3af;">(可自訂)</span>
+            </div>
             <div class="transit-input-box">
-                <input type="text" id="bus-route-input" class="transit-input" style="width: 90px; text-align: center;" placeholder="路線">
-                <input type="text" id="bus-stop-input" class="transit-input" style="width: 110px; text-align: center;" placeholder="站ID" value="003345">
+                <input type="text" id="bus-route-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="路線">
+                <input type="text" id="bus-stop-input" class="transit-input" style="width: 95px; text-align: center;" placeholder="站ID" value="003345">
                 <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
                 <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
             </div>
             <div class="transit-container" id="bus-eta-list">
-                <div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.2rem;">載入巴士資料中...</div>
+                <div style="color: #9ca3af; text-align: center; padding: 10px;">載入巴士資料中...</div>
             </div>
         </div>
+    </div>
 
-        <!-- 雲端備忘錄面板 -->
-        <div class="panel">
+    <!-- 備忘錄獨立放下方或按需檢視 -->
+    <div class="dashboard-container" style="margin-top: 14px;">
+        <div class="panel" style="grid-column: span 2;">
             <div class="panel-title">
                 <span>📝 雲端備忘錄</span>
                 <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
             </div>
             <div class="memo-input-box">
-                <input type="text" id="memo-input" class="memo-input" placeholder="輸入備忘..." onkeypress="if(event.key==='Enter')addMemo()">
+                <input type="text" id="memo-input" class="memo-input" style="flex: 1;" placeholder="輸入新備忘..." onkeypress="if(event.key==='Enter')addMemo()">
                 <button class="memo-btn" onclick="addMemo()">新增</button>
             </div>
-            <div class="memo-list" id="memo-list">
-                <div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.2rem;">正在連接雲端...</div>
+            <div class="memo-list" id="memo-list" style="max-height: 150px;">
+                <div style="color: #9ca3af; text-align: center; padding: 10px;">正在連接雲端...</div>
             </div>
         </div>
     </div>
@@ -237,15 +261,12 @@
             { name: "國慶日", date: "2026-10-01" },
             { name: "重陽節", date: "2026-10-23" },
             { name: "聖誕節", date: "2026-12-25" },
-            { name: "聖誕節後第一個周日", date: "2026-12-26" },
             { name: "元旦", date: "2027-01-01" },
             { name: "農曆年初一", date: "2027-02-06" },
             { name: "農曆年初二", date: "2027-02-07" },
             { name: "農曆年初三", date: "2027-02-08" },
             { name: "清明節", date: "2027-04-05" },
-            { name: "復活節星期五", date: "2027-03-26" },
             { name: "勞動節", date: "2027-05-01" },
-            { name: "佛誕", date: "2027-05-13" },
             { name: "端午節", date: "2027-06-09" }
         ];
 
@@ -288,7 +309,7 @@
             if (upcoming.length > 0) {
                 const next = upcoming[0];
                 let timeText = next.diffDays === 0 ? '就是今天！' : `${next.diffDays} 日後`;
-                el.innerHTML = `最近假期: <span style="color: var(--accent-blue); font-weight: bold;">${next.name}</span> (<span style="color: var(--accent-yellow); font-weight: 900;">${timeText}</span>)`;
+                el.innerHTML = `最近假期: <span style="color: var(--accent-blue);">${next.name}</span> (<span style="color: var(--accent-yellow); font-weight: bold;">${timeText}</span>)`;
             } else {
                 el.innerHTML = `暫無近期假期資料`;
             }
@@ -361,7 +382,7 @@
                 if (json.status === 1 && json.data) {
                     const stationData = json.data['TML-HEO'];
                     if (!stationData) {
-                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.2rem;">暫無列車資料</div>';
+                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; grid-column: span 2;">暫無列車資料</div>';
                         return;
                     }
 
@@ -369,40 +390,37 @@
                     const upTrains = (stationData.UP || []).slice(0, 2);
                     const destMap = { 'WKS': '烏溪沙', 'MOS': '馬鞍山', 'TUM': '屯門', 'HUH': '紅磡', 'ETS': '尖東', 'KAT': '啟德', 'DIH': '鑽石山' };
 
-                    let html = '';
-                    // 順序展示：下行與上行班次改為清晰的單行卡片，確保完全睇晒唔會被夾窄
-                    const allTrains = [
-                        ...downTrains.map(t => ({ ...t, directionName: '屯門方向' })),
-                        ...upTrains.map(t => ({ ...t, directionName: '烏溪沙方向' }))
-                    ];
+                    function renderTrainRows(trains) {
+                        if (trains.length === 0) return '<div style="color: #6b7280; font-size: 1rem;">暫無班次</div>';
+                        return trains.map(t => {
+                            const destName = destMap[t.dest] || t.dest || '';
+                            const trainTime = new Date(t.time.replace(/-/g, '/'));
+                            const diffMin = Math.round((trainTime - new Date()) / 60000);
+                            const clockTime = `${String(trainTime.getHours()).padStart(2, '0')}:${String(trainTime.getMinutes()).padStart(2, '0')}`;
+                            const timeText = diffMin <= 0 ? '即將到達' : `${diffMin}分鐘`;
 
-                    if (allTrains.length === 0) {
-                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.2rem;">暫無班次</div>';
-                        return;
+                            return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 1.1rem;">
+                                    <span style="color: #d1d5db;">${destName}</span>
+                                    <div style="display: flex; gap: 8px; align-items: baseline;">
+                                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.2rem;">${timeText}</span>
+                                        <span style="color: var(--accent-yellow); font-size: 1rem;">${clockTime}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
                     }
 
-                    html = allTrains.map(t => {
-                        const destName = destMap[t.dest] || t.dest || '';
-                        const trainTime = new Date(t.time.replace(/-/g, '/'));
-                        const diffMin = Math.round((trainTime - new Date()) / 60000);
-                        const clockTime = `${String(trainTime.getHours()).padStart(2, '0')}:${String(trainTime.getMinutes()).padStart(2, '0')}`;
-                        const timeText = diffMin <= 0 ? '即將到達' : `${diffMin} 分鐘`;
-                        const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
-
-                        return `
-                            <div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(192,132,252,0.3); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <span style="font-size: 1.1rem; color: #9ca3af;">月台 ${t.plat} 往 <strong style="color: ${destColor};">${destName}</strong></span>
-                                </div>
-                                <div style="display: flex; gap: 16px; align-items: baseline;">
-                                    <span style="color: var(--accent-green); font-weight: 900; font-size: 1.3rem;">${timeText}</span>
-                                    <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.2rem;">${clockTime}</span>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-
-                    container.innerHTML = html;
+                    container.innerHTML = `
+                        <div class="mtr-direction-box">
+                            <div class="mtr-dir-title">⬇️ 往屯門方向</div>
+                            ${renderTrainRows(downTrains)}
+                        </div>
+                        <div class="mtr-direction-box">
+                            <div class="mtr-dir-title">⬆️ 往烏溪沙方向</div>
+                            ${renderTrainRows(upTrains)}
+                        </div>
+                    `;
                 }
             } catch (e) {}
         }
@@ -423,7 +441,7 @@
             const routes = getStoredBusRoutes();
 
             if (routes.length === 0) {
-                container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.2rem;">請於上方新增路線</div>';
+                container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">請於上方新增路線</div>';
                 return;
             }
 
@@ -432,17 +450,14 @@
                 let r = routes[i];
                 try {
                     let etas = [];
-                    for (let st = 1; st <= 3; st++) {
+                    for (let st = 1; st <= 2; st++) {
                         try {
                             const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
                             if (res.ok) {
                                 const data = await res.json();
                                 if (data && data.data) {
-                                    if (Array.isArray(data.data)) {
-                                        etas = etas.concat(data.data);
-                                    } else {
-                                        etas.push(data.data);
-                                    }
+                                    if (Array.isArray(data.data)) { etas = etas.concat(data.data); } 
+                                    else { etas.push(data.data); }
                                 }
                             }
                         } catch (err) {}
@@ -453,59 +468,38 @@
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
                             validEtas.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                            
                             const uniqueEtas = [];
                             validEtas.forEach(e => {
                                 const eTime = new Date(e.eta).getTime();
-                                const isDuplicate = uniqueEtas.some(existing => {
-                                    const exTime = new Date(existing.eta).getTime();
-                                    return Math.abs(eTime - exTime) < 60000;
-                                });
+                                const isDuplicate = uniqueEtas.some(existing => Math.abs(eTime - new Date(existing.eta).getTime()) < 60000);
                                 if (!isDuplicate) uniqueEtas.push(e);
                             });
 
-                            const topEtas = uniqueEtas.slice(0, 3);
-                            
+                            const topEtas = uniqueEtas.slice(0, 2);
                             etasListHtml = topEtas.map((e, idx) => {
                                 const nextTime = new Date(e.eta);
                                 const diffMin = Math.round((nextTime - new Date()) / 60000);
-                                const timeStr = diffMin <= 1 ? '將到達' : `${diffMin} 分鐘`;
+                                const timeStr = diffMin <= 1 ? '將到達' : `${diffMin}分鐘`;
                                 const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
-
-                                const rmkText = e.rmk_tc && e.rmk_tc.trim() !== '' ? e.rmk_tc.trim() : '';
-                                const isSpecial = (e.service_type && e.service_type > 1) || 
-                                                  (rmkText !== '' && rmkText !== '原定班次' && (rmkText.includes('特別') || rmkText.includes('特班')));
-                                
-                                const specialClass = isSpecial ? 'pill-active-special' : 'pill-dim';
-                                const normalClass = !isSpecial ? 'pill-active-normal' : 'pill-dim';
-
-                                return `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-                                        <span style="color: #9ca3af;">${idx + 1}: <strong style="color: var(--accent-green); font-size: 1.3rem;">${timeStr}</strong> <span style="font-size: 1.1rem;">(${clockTime})</span></span>
-                                        <div style="display: flex; gap: 8px; align-items: center;">
-                                            <span class="status-pill ${specialClass}">特別</span>
-                                            <span class="status-pill ${normalClass}">普通</span>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
+                                return `<span style="color: var(--accent-green); font-weight: 900;">${timeStr}</span> <span style="font-size:0.95rem; color:#9ca3af;">(${clockTime})</span>`;
+                            }).join(' | ');
                         } else {
-                            etasListHtml = '<div style="color: #9ca3af; font-size: 1.2rem; margin-top: 6px;">暫無班次</div>';
+                            etasListHtml = '<span style="color: #9ca3af; font-size: 1rem;">暫無班次</span>';
                         }
                     } else {
-                        etasListHtml = '<div style="color: #9ca3af; font-size: 1.2rem; margin-top: 6px;">暫無班次</div>';
+                        etasListHtml = '<span style="color: #9ca3af; font-size: 1rem;">暫無班次</span>';
                     }
 
                     htmlContent += `
-                        <div class="transit-card" style="flex-direction: column; align-items: stretch;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span class="route-badge">${r.route}</span>
-                                    ${r.name ? `<span style="font-size: 1.3rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
-                                </div>
-                                <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.4rem; padding: 0;">✕</button>
+                        <div class="transit-card">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="route-badge">${r.route}</span>
+                                <span style="font-size: 1.1rem; font-weight: bold; color: var(--accent-blue);">${r.name || ''}</span>
                             </div>
-                            <div>${etasListHtml}</div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div>${etasListHtml}</div>
+                                <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.2rem;">✕</button>
+                            </div>
                         </div>
                     `;
                 } catch (err) {}
@@ -567,17 +561,13 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.2rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
                 <div class="memo-item">
-                    <span style="font-size: 1.2rem; font-weight: 600;">• ${text}</span>
-                    <div style="display: flex; gap: 8px;">
-                        <button style="background: rgba(255,255,255,0.15); color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:1rem;" onclick="moveMemo(${index}, -1)" ${index === 0 ? 'style="opacity:0.3;pointer-events:none;"' : ''}>⬆</button>
-                        <button style="background: rgba(255,255,255,0.15); color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:1rem;" onclick="moveMemo(${index}, 1)" ${index === memos.length - 1 ? 'style="opacity:0.3;pointer-events:none;"' : ''}>⬇</button>
-                        <button style="color:#f87171; background:none; border:none; font-weight:bold; cursor:pointer; font-size:1.3rem;" onclick="deleteMemo(${index})">✕</button>
-                    </div>
+                    <span style="font-size: 1.1rem;">• ${text}</span>
+                    <button style="color:#f87171; background:none; border:none; font-weight:bold; cursor:pointer; font-size:1.2rem;" onclick="deleteMemo(${index})">✕</button>
                 </div>
             `).join('');
             window.currentMemos = memos; 
@@ -590,16 +580,6 @@
             let memos = window.currentMemos || [];
             memos.push(val);
             input.value = '';
-            renderMemos(memos);
-            await saveMemosToCloud(memos);
-        }
-
-        async function moveMemo(index, direction) {
-            let memos = window.currentMemos || [];
-            const targetIndex = index + direction;
-            if (targetIndex < 0 || targetIndex >= memos.length) return;
-            const item = memos.splice(index, 1)[0];
-            memos.splice(targetIndex, 0, item);
             renderMemos(memos);
             await saveMemosToCloud(memos);
         }
