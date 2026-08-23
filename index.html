@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Tablet Dashboard - Theme Switcher</title>
+    <title>3008 Tablet Dashboard</title>
     <style>
         :root { 
             --bg-color: #f3f4f6; 
@@ -80,15 +80,16 @@
             justify-content: space-between;
             align-items: center;
         }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.25rem; font-weight: 800; }
-        .date-part { color: var(--text-main); }
-        .weekday-part { color: var(--accent-blue); font-size: 1rem; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; }
+        .date-part { color: var(--text-main); font-size: 1.45rem; font-weight: 850; }
+        .weekday-part { color: var(--accent-blue); font-size: 1.15rem; font-weight: 700; }
         .clock-right { text-align: right; }
         .clock { font-size: 3rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
         .ampm { font-size: 1rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; }
 
         /* 右上：天氣 */
         .wx-box { display: flex; align-items: center; justify-content: space-between; }
+        .wx-temp-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .wx-temp { font-size: 3.2rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
 
         @keyframes warningBlink {
@@ -96,14 +97,14 @@
             50% { opacity: 0.5; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
-        .warning-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .warning-container { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
         .warning-badge {
             background: rgba(239, 68, 68, 0.15);
             color: var(--accent-red);
             border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.95rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
             font-weight: bold;
             animation: warningBlink 1.5s infinite ease-in-out;
         }
@@ -149,8 +150,8 @@
         .transit-add-btn { background: var(--accent-blue); color: #ffffff; border: none; padding: 0 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; white-space: nowrap; }
 
         .status-pill {
-            font-size: 0.8rem;
-            padding: 2px 6px;
+            font-size: 0.85rem;
+            padding: 2px 8px;
             border-radius: 4px;
             font-weight: bold;
             border: 1px solid transparent;
@@ -168,23 +169,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: bold;
             transition: background-color 0.3s, border-color 0.3s;
         }
 
-        /* 備忘錄專用 */
+        /* 備忘錄專用（放大字體） */
         .memo-input-box { display: flex; gap: 6px; margin-bottom: 6px; }
-        .memo-input { flex: 1; background: var(--input-bg); border: 1px solid var(--input-border); padding: 6px 10px; border-radius: 8px; color: var(--text-main); font-size: 1rem; outline: none; }
+        .memo-input { flex: 1; background: var(--input-bg); border: 1px solid var(--input-border); padding: 8px 12px; border-radius: 8px; color: var(--text-main); font-size: 1.1rem; outline: none; }
         .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 6px rgba(16,185,129,0.3); }
-        .memo-btn { background: var(--accent-green); color: #ffffff; border: none; padding: 0 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .memo-btn { background: var(--accent-green); color: #ffffff; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
         
         .memo-list { display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto; }
-        .memo-item { background: var(--item-bg); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid var(--item-border); transition: background-color 0.3s; }
-        .memo-actions { display: flex; gap: 4px; }
-        .memo-action-btn { background: var(--input-border); color: var(--text-main); border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
-        .memo-delete { color: var(--accent-red); background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.1rem; padding: 0 4px; }
-        .refresh-memo-btn { background: var(--item-border); color: var(--text-main); border: 1px solid var(--input-border); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: bold; }
+        .memo-item { background: var(--item-bg); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: 650; gap: 6px; border: 1px solid var(--item-border); transition: background-color 0.3s; }
+        .memo-actions { display: flex; gap: 6px; }
+        .memo-action-btn { background: var(--input-border); color: var(--text-main); border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 0.95rem; }
+        .memo-delete { color: var(--accent-red); background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.2rem; padding: 0 4px; }
+        .refresh-memo-btn { background: var(--item-border); color: var(--text-main); border: 1px solid var(--input-border); padding: 2px 8px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -205,41 +206,42 @@
                 </div>
             </div>
             <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color);">
-                <div id="holiday-countdown" style="font-size: 1.05rem; color: var(--text-secondary);">計算假期中...</div>
+                <div id="holiday-countdown" style="font-size: 1.15rem; color: var(--text-secondary); font-weight: 600;">計算假期中...</div>
             </div>
         </div>
 
         <!-- 右上：天氣資訊 + Light/Dark 模式按鈕 -->
         <div class="panel">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: -4px;">
-                <span style="font-size: 0.9rem; color: var(--text-secondary);">天文台實時天氣</span>
+                <span style="font-size: 0.95rem; color: var(--text-secondary);">天文台實時天氣</span>
                 <button class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()">🌙 深色模式</button>
             </div>
             <div class="wx-box">
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="wx-temp-area">
                     <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 56px; height: 56px; display: none;" onerror="this.style.display='none'">
                     <span class="wx-temp" id="current-temp">--°C</span>
+                    <!-- 警告訊息放喺溫度隔離 -->
+                    <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
                 </div>
-                <div style="text-align: right; font-size: 1.1rem; font-weight: 600;">
+                <div style="text-align: right; font-size: 1.15rem; font-weight: 600;">
                     <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
                     <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
                 </div>
             </div>
-            <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
         </div>
 
-        <!-- 左下：港鐵恆安站（同一行對齊） + 雲端備忘錄 -->
+        <!-- 左下：港鐵恆安站 + 雲端備忘錄 -->
         <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
             <div>
                 <div class="transit-container" id="mtr-eta-list">
-                    <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1rem;">載入港鐵資料中...</div>
+                    <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1.1rem;">載入港鐵資料中...</div>
                 </div>
             </div>
 
-            <!-- 雲端備忘錄放喺港鐵下面 -->
+            <!-- 雲端備忘錄 -->
             <div style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 1.05rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
+                    <span style="font-size: 1.15rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
                     <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
                 </div>
                 <div class="memo-input-box">
@@ -247,7 +249,7 @@
                     <button class="memo-btn" onclick="addMemo()">新增</button>
                 </div>
                 <div class="memo-list" id="memo-list">
-                    <div style="color: var(--text-secondary); text-align: center; padding: 4px; font-size: 0.95rem;">正在連接雲端...</div>
+                    <div style="color: var(--text-secondary); text-align: center; padding: 4px; font-size: 1.05rem;">正在連接雲端...</div>
                 </div>
             </div>
         </div>
@@ -261,7 +263,7 @@
                 <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
             </div>
             <div class="transit-container" id="bus-eta-list" style="max-height: 250px; overflow-y: auto;">
-                <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1rem;">載入巴士資料中...</div>
+                <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1.1rem;">載入巴士資料中...</div>
             </div>
         </div>
     </div>
@@ -270,7 +272,6 @@
         const BIN_ID = "6a87123ada38895dfefbc1ca"; 
         const MASTER_KEY = "$2a$10$HvcOoQBCbmfplG2XSkexuOAFTbJfJzpuucJSOImKmhiM3K//7f5kO";
 
-        // 主題切換邏輯
         function initTheme() {
             const savedTheme = localStorage.getItem('dashboard_theme') || 'light';
             if (savedTheme === 'dark') {
@@ -442,8 +443,8 @@
 
             return `
                 <div class="mtr-cell">
-                    <span style="color: var(--accent-purple);">${t.plat}台 ${destName}</span>
-                    <div style="display: flex; gap: 8px;">
+                    <span style="color: var(--accent-purple);">${destName}</span>
+                    <div style="display: flex; gap: 10px;">
                         <span style="color: var(--accent-green);">${timeText}</span>
                         <span style="color: var(--accent-yellow);">${clockTime}</span>
                     </div>
@@ -496,9 +497,9 @@
                         const isSpecial = (e.service_type && e.service_type > 1) || (rmkText.includes('特別') || rmkText.includes('特班'));
 
                         return `
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-top: 4px; border-top: 1px solid var(--border-color); padding-top: 4px;">
-                                <span style="color: var(--text-secondary);">${idx + 1}: <strong style="color: var(--accent-green); font-size: 1.05rem;">${timeStr}</strong> <span style="font-size: 0.85rem;">(${clockTime})</span></span>
-                                <div style="display: flex; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1rem; margin-top: 5px; border-top: 1px solid var(--border-color); padding-top: 5px;">
+                                <span style="color: var(--text-secondary);">${idx + 1}: <strong style="color: var(--accent-green); font-size: 1.1rem;">${timeStr}</strong> <span style="font-size: 0.9rem;">(${clockTime})</span></span>
+                                <div style="display: flex; gap: 6px;">
                                     <span class="status-pill ${isSpecial ? 'pill-active-special' : 'pill-dim'}">特別</span>
                                     <span class="status-pill ${!isSpecial ? 'pill-active-normal' : 'pill-dim'}">普通</span>
                                 </div>
@@ -506,7 +507,7 @@
                         `;
                     }).join('');
                 } else {
-                    etasListHtml = '<div style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 4px;">暫無班次</div>';
+                    etasListHtml = '<div style="color: var(--text-secondary); font-size: 1rem; margin-top: 4px;">暫無班次</div>';
                 }
 
                 htmlContent += `
@@ -514,7 +515,7 @@
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="route-badge">${r.route}</span>
-                                ${r.name ? `<span style="font-size: 1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
+                                ${r.name ? `<span style="font-size: 1.05rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                             </div>
                             <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:var(--accent-red); cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
                         </div>
@@ -576,7 +577,7 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 4px; font-size: 0.95rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 4px; font-size: 1.05rem;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
@@ -620,7 +621,6 @@
             await saveMemosToCloud(memos);
         }
 
-        // 初始化執行
         initTheme();
         updateTime(); 
         updateHolidayCountdown();
