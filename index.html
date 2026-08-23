@@ -61,7 +61,6 @@
             gap: 10px;
         }
 
-        /* 左上角置中對齊 */
         .panel-top-left {
             justify-content: center; 
         }
@@ -104,41 +103,41 @@
             animation: warningBlink 1.5s infinite ease-in-out;
         }
 
-        /* 備忘錄樣式優化與字體放大 */
+        /* 備忘錄字體進一步放大 */
         .memo-input-box { display: flex; gap: 8px; margin-bottom: 8px; }
-        .memo-input { flex: 1; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; color: var(--text-main); font-size: 1.15rem; outline: none; }
+        .memo-input { flex: 1; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); padding: 10px 14px; border-radius: 8px; color: var(--text-main); font-size: 1.3rem; outline: none; }
         .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px rgba(52,211,153,0.2); }
-        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 18px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
         
-        .memo-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
-        .memo-item { background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: 600; gap: 8px; border: 1px solid rgba(255,255,255,0.06); }
+        .memo-list { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
+        .memo-item { background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1.3rem; font-weight: 600; gap: 10px; border: 1px solid rgba(255,255,255,0.06); }
 
         .memo-actions { display: flex; gap: 6px; }
-        .memo-action-btn { background: rgba(255,255,255,0.1); color: var(--text-main); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
-        .memo-delete { color: var(--accent-red); background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.1rem; padding: 0 4px; }
+        .memo-action-btn { background: rgba(255,255,255,0.1); color: var(--text-main); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        .memo-delete { color: var(--accent-red); background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.2rem; padding: 0 4px; }
         
-        .refresh-memo-btn { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; }
+        .refresh-memo-btn { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
 
         .transit-container { display: flex; flex-direction: column; gap: 8px; }
 
-        /* 港鐵 1x4 大字體清單樣式 */
-        .mtr-grid {
+        /* 港鐵 4x1 橫向四格樣式 */
+        .mtr-grid-4x1 {
             display: grid;
-            grid-template-columns: 1fr; /* 1直行 */
-            gap: 8px; /* 4橫排的間距 */
+            grid-template-columns: repeat(4, 1fr); /* 橫向 4 格 */
+            gap: 6px;
         }
-        .mtr-card {
+        .mtr-card-4x1 {
             background: rgba(0, 0, 0, 0.35);
             border: 1px solid rgba(251, 191, 36, 0.25);
             border-radius: 10px;
-            padding: 10px 18px;
+            padding: 8px 4px;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
             align-items: center;
+            text-align: center;
+            min-height: 80px;
         }
-        .mtr-dest { font-size: 1.5rem; font-weight: 800; }
-        .mtr-time { font-size: 2.2rem; font-weight: 900; line-height: 1; }
-        .mtr-clock { font-size: 1.2rem; font-weight: 700; opacity: 0.9; }
 
         .transit-card {
             background: rgba(0, 0, 0, 0.3);
@@ -168,7 +167,7 @@
 <body>
 
     <div class="main-grid">
-        <!-- 左上：日期、農曆與大時鐘 (置中) -->
+        <!-- 左上：日期、農曆與大時鐘 -->
         <div class="panel panel-top-left">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <div style="display: flex; align-items: baseline; gap: 10px;">
@@ -178,7 +177,6 @@
                 <button class="theme-toggle-btn" onclick="toggleTheme()" title="切換 Light / Dark 模式">🌓</button>
             </div>
 
-            <!-- 農曆與節氣資訊列 -->
             <div id="lunar-info" style="font-size: 1rem; color: var(--accent-purple); font-weight: bold; text-align: center; background: rgba(192,132,252,0.1); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(192,132,252,0.2);">
                 載入農曆中...
             </div>
@@ -215,13 +213,13 @@
             
             <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
             
-            <!-- 移到底部的假期倒數 -->
+            <!-- 天氣下面的假期倒數 -->
             <div id="holiday-countdown" style="margin-top: auto; background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
                 <span style="font-size: 0.9rem; color: #9ca3af;">計算假期中...</span>
             </div>
         </div>
 
-        <!-- 左下：港鐵恆安站 (1x4 大字版) + 放大版雲端備忘錄 -->
+        <!-- 左下：港鐵恆安站 (4x1 橫排) + 大字版雲端備忘錄 -->
         <div class="panel">
             <div class="transit-container" id="mtr-eta-list">
                 <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入港鐵實時資料中...</div>
@@ -236,7 +234,7 @@
                     <button class="memo-btn" onclick="addMemo()">新增</button>
                 </div>
                 <div class="memo-list" id="memo-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 4px; font-size: 1rem;">正在連接雲端...</div>
+                    <div style="color: #9ca3af; text-align: center; padding: 4px; font-size: 1.1rem;">正在連接雲端...</div>
                 </div>
             </div>
         </div>
@@ -422,9 +420,9 @@
                     allTrains.sort((a, b) => new Date(a.time.replace(/-/g, '/')) - new Date(b.time.replace(/-/g, '/')));
                     const top4Trains = allTrains.slice(0, 4);
 
-                    let html = '<div class="mtr-grid">';
+                    let html = '<div class="mtr-grid-4x1">';
                     for (let i = 0; i < 4; i++) {
-                        html += renderMtrRow(top4Trains[i], destMap);
+                        html += renderMtrCard4x1(top4Trains[i], destMap);
                     }
                     html += '</div>';
                     
@@ -433,12 +431,12 @@
             } catch (e) {}
         }
 
-        // 渲染 1x4 直行大字體橫排
-        function renderMtrRow(t, destMap) {
+        // 渲染 4x1 橫向四格卡片
+        function renderMtrCard4x1(t, destMap) {
             if (!t) {
                 return `
-                    <div class="mtr-card" style="opacity: 0.3; justify-content: center;">
-                        <span style="font-size: 1rem; color: #9ca3af;">暫無班次</span>
+                    <div class="mtr-card-4x1" style="opacity: 0.3; justify-content: center;">
+                        <span style="font-size: 0.85rem; color: #9ca3af;">暫無班次</span>
                     </div>
                 `;
             }
@@ -454,12 +452,10 @@
             const destColor = (t.dest === 'WKS' || destName === '烏溪沙') ? 'var(--accent-blue)' : 'var(--accent-purple)';
 
             return `
-                <div class="mtr-card">
-                    <span class="mtr-dest" style="color: ${destColor};">往 ${destName}</span>
-                    <div style="display: flex; align-items: baseline; gap: 14px;">
-                        <span class="mtr-time" style="color: var(--accent-green);">${timeText}</span>
-                        <span class="mtr-clock" style="color: var(--accent-yellow);">${clockTime}</span>
-                    </div>
+                <div class="mtr-card-4x1">
+                    <span style="font-size: 0.95rem; color: ${destColor}; font-weight: 800;">往 ${destName}</span>
+                    <div style="font-size: 1.35rem; color: var(--accent-green); font-weight: 900; margin: 2px 0;">${timeText}</div>
+                    <span style="font-size: 0.85rem; color: var(--accent-yellow); font-weight: bold;">${clockTime}</span>
                 </div>
             `;
         }
@@ -596,7 +592,7 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 4px; font-size: 1rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 4px; font-size: 1.1rem;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
