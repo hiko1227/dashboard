@@ -157,8 +157,6 @@
             border: 1px solid transparent;
         }
         .pill-active-special { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); border-color: rgba(245, 158, 11, 0.4); }
-        .pill-active-normal { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border-color: rgba(16, 185, 129, 0.4); }
-        .pill-dim { background: var(--item-border); color: var(--text-secondary); opacity: 0.3; }
 
         /* 港鐵自訂卡片樣式 */
         .mtr-cell {
@@ -496,13 +494,15 @@
                         const rmkText = e.rmk_tc || '';
                         const isSpecial = (e.service_type && e.service_type > 1) || (rmkText.includes('特別') || rmkText.includes('特班'));
 
+                        // 只在特別班次時顯示一個標籤，普通班次保持乾淨不顯示多餘掣
+                        const specialTagHtml = isSpecial 
+                            ? `<span class="status-pill pill-active-special">特別班次</span>` 
+                            : '';
+
                         return `
                             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1rem; margin-top: 5px; border-top: 1px solid var(--border-color); padding-top: 5px;">
                                 <span style="color: var(--text-secondary);">${idx + 1}: <strong style="color: var(--accent-green); font-size: 1.1rem;">${timeStr}</strong> <span style="font-size: 0.9rem;">(${clockTime})</span></span>
-                                <div style="display: flex; gap: 6px;">
-                                    <span class="status-pill ${isSpecial ? 'pill-active-special' : 'pill-dim'}">特別</span>
-                                    <span class="status-pill ${!isSpecial ? 'pill-active-normal' : 'pill-dim'}">普通</span>
-                                </div>
+                                <div>${specialTagHtml}</div>
                             </div>
                         `;
                     }).join('');
