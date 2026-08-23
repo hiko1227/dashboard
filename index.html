@@ -484,16 +484,14 @@
                 let etasListHtml = '';
                 const validEtas = etas.filter(e => e.eta).sort((a, b) => new Date(a.eta) - new Date(b.eta));
                 
-                // 去重邏輯：過濾掉相同時間的重複班次，並優先保留帶有官方備註（如「不經彩虹」、「瀝源」等）嘅班次
                 const uniqueEtasMap = new Map();
                 validEtas.forEach(e => {
-                    const timeKey = e.eta.substring(0, 16); // 取到分鐘 (例如 2026-08-23T16:49)
+                    const timeKey = e.eta.substring(0, 16); 
                     const rmkText = (e.rmk_tc || '').trim();
 
                     if (!uniqueEtasMap.has(timeKey)) {
                         uniqueEtasMap.set(timeKey, e);
                     } else {
-                        // 如果已經存在同一分鐘，若當前呢個有實質備註，就優先覆蓋上去
                         const existing = uniqueEtasMap.get(timeKey);
                         const existingRmk = (existing.rmk_tc || '').trim();
                         if (rmkText && !existingRmk) {
@@ -512,14 +510,17 @@
                         const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
 
                         const rmkText = (e.rmk_tc || '').trim();
-                        // 直接顯示九巴官方提供的備註文字（例如「不經彩虹」、「瀝源」等）
-                        const remarkTagHtml = rmkText 
+                        const isSpecial = rmkText !== '';
+                        // 原定班次用綠色，特別班次用黃色
+                        const timeColor = isSpecial ? 'var(--accent-yellow)' : 'var(--accent-green)';
+                        
+                        const remarkTagHtml = isSpecial 
                             ? `<span class="status-pill pill-active-special">${rmkText}</span>` 
                             : '';
 
                         return `
                             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1rem; margin-top: 5px; border-top: 1px solid var(--border-color); padding-top: 5px;">
-                                <span style="color: var(--text-secondary);">${idx + 1}: <strong style="color: var(--accent-green); font-size: 1.1rem;">${timeStr}</strong> <span style="font-size: 0.9rem;">(${clockTime})</span></span>
+                                <span style="color: var(--text-secondary);">${idx + 1}: <strong style="color: ${timeColor}; font-size: 1.1rem;">${timeStr}</strong> <span style="font-size: 0.9rem;">(${clockTime})</span></span>
                                 <div>${remarkTagHtml}</div>
                             </div>
                         `;
