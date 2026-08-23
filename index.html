@@ -483,19 +483,34 @@
 
                 let etasListHtml = '';
                 const validEtas = etas.filter(e => e.eta).sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                if (validEtas.length > 0) {
-                    const topEtas = validEtas.slice(0, 3);
+                
+                // 去重邏輯：過濾掉相同時間的重複班次，並優先保留特別班次標記
+                const uniqueEtasMap = new Map();
+                validEtas.forEach(e => {
+                    const timeKey = e.eta.substring(0, 16); // 取到分鐘 (例如 2026-08-23T16:49)
+                    const rmkText = e.rmk_tc || '';
+                    const isSpecial = (e.service_type && e.service_type > 1) || (rmkText.includes('特別') || rmkText.includes('特班'));
+
+                    if (!uniqueEtasMap.has(timeKey)) {
+                        uniqueEtasMap.set(timeKey, { ...e, isSpecial });
+                    } else {
+                        // 如果已經存在同一分鐘，若當前呢個係特別班次，就覆蓋上去以保留標記
+                        if (isSpecial) {
+                            uniqueEtasMap.set(timeKey, { ...e, isSpecial });
+                        }
+                    }
+                });
+
+                const topEtas = Array.from(uniqueEtasMap.values()).sort((a, b) => new Date(a.eta) - new Date(b.eta)).slice(0, 3);
+
+                if (topEtas.length > 0) {
                     etasListHtml = topEtas.map((e, idx) => {
                         const nextTime = new Date(e.eta);
                         const diffMin = Math.round((nextTime - new Date()) / 60000);
                         const timeStr = diffMin <= 1 ? '將到' : `${diffMin}分鐘`;
                         const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
 
-                        const rmkText = e.rmk_tc || '';
-                        const isSpecial = (e.service_type && e.service_type > 1) || (rmkText.includes('特別') || rmkText.includes('特班'));
-
-                        // 只在特別班次時顯示一個標籤，普通班次保持乾淨不顯示多餘掣
-                        const specialTagHtml = isSpecial 
+                        const specialTagHtml = e.isSpecial 
                             ? `<span class="status-pill pill-active-special">特別班次</span>` 
                             : '';
 
