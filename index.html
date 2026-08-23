@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Tablet Dashboard - 2x2 Grid Light</title>
+    <title>3008 Tablet Dashboard - 2x2 Clean View</title>
     <style>
         :root { 
             --bg-color: #f3f4f6; 
@@ -85,15 +85,6 @@
         }
 
         /* 通用元件 */
-        .panel-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2px;
-        }
-
         .transit-container { display: flex; flex-direction: column; gap: 8px; }
         .transit-card {
             background: #f9fafb;
@@ -133,7 +124,7 @@
         .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 6px rgba(5,150,105,0.2); }
         .memo-btn { background: var(--accent-green); color: #ffffff; border: none; padding: 0 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
         
-        .memo-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+        .memo-list { display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto; }
         .memo-item { background: #f9fafb; padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid #e5e7eb; }
         .memo-actions { display: flex; gap: 4px; }
         .memo-action-btn { background: #e5e7eb; color: #374151; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
@@ -163,9 +154,8 @@
             </div>
         </div>
 
-        <!-- 右上：天氣資訊 -->
+        <!-- 右上：天氣資訊 (無標題) -->
         <div class="panel">
-            <div class="panel-title" style="color: var(--accent-yellow);">🌤️ 天氣資訊</div>
             <div class="wx-box">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 56px; height: 56px; display: none;" onerror="this.style.display='none'">
@@ -179,34 +169,18 @@
             <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
         </div>
 
-        <!-- 左下：港鐵恆安站（橫向分開左右行） -->
-        <div class="panel">
-            <div class="panel-title" style="color: var(--accent-purple);">🚇 港鐵恆安站</div>
-            <div class="transit-container" id="mtr-eta-list">
-                <div style="color: var(--text-secondary); text-align: center; padding: 16px; font-size: 1rem;">載入港鐵資料中...</div>
-            </div>
-        </div>
-
-        <!-- 右下：九巴實時到站 + 雲端備忘錄 -->
-        <div class="panel">
-            <div class="panel-title" style="color: var(--accent-yellow);">
-                <span>🚌 九巴實時到站</span>
-                <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: normal;">(支援特別班次燈號)</span>
-            </div>
-            <div class="transit-input-box">
-                <input type="text" id="bus-route-input" class="transit-input" style="width: 60px; text-align: center;" placeholder="路線">
-                <input type="text" id="bus-stop-input" class="transit-input" style="width: 80px; text-align: center;" placeholder="站ID" value="003345">
-                <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
-                <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
-            </div>
-            <div class="transit-container" id="bus-eta-list" style="max-height: 150px; overflow-y: auto;">
-                <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1rem;">載入巴士資料中...</div>
+        <!-- 左下：港鐵恆安站（無標題，打橫同一行） + 雲端備忘錄 -->
+        <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div class="transit-container" id="mtr-eta-list">
+                    <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1rem;">載入港鐵資料中...</div>
+                </div>
             </div>
 
-            <!-- 雲端備忘錄放喺九巴下面同一格 -->
-            <div style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 10px;">
+            <!-- 雲端備忘錄放喺港鐵下面 -->
+            <div style="margin-top: 10px; border-top: 1px solid #e5e7eb; padding-top: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 1.1rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
+                    <span style="font-size: 1.05rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
                     <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
                 </div>
                 <div class="memo-input-box">
@@ -214,8 +188,21 @@
                     <button class="memo-btn" onclick="addMemo()">新增</button>
                 </div>
                 <div class="memo-list" id="memo-list">
-                    <div style="color: var(--text-secondary); text-align: center; padding: 6px; font-size: 0.95rem;">正在連接雲端...</div>
+                    <div style="color: var(--text-secondary); text-align: center; padding: 4px; font-size: 0.95rem;">正在連接雲端...</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 右下：九巴實時到站 (無標題) -->
+        <div class="panel">
+            <div class="transit-input-box">
+                <input type="text" id="bus-route-input" class="transit-input" style="width: 60px; text-align: center;" placeholder="路線">
+                <input type="text" id="bus-stop-input" class="transit-input" style="width: 80px; text-align: center;" placeholder="站ID" value="003345">
+                <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
+                <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
+            </div>
+            <div class="transit-container" id="bus-eta-list" style="max-height: 250px; overflow-y: auto;">
+                <div style="color: var(--text-secondary); text-align: center; padding: 10px; font-size: 1rem;">載入巴士資料中...</div>
             </div>
         </div>
     </div>
@@ -344,10 +331,12 @@
                     const upTrains = (stationData.UP || []).slice(0, 2);
                     const destMap = { 'WKS': '烏溪沙', 'MOS': '馬鞍山', 'TUM': '屯門', 'HUH': '紅磡' };
 
-                    let gridHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">';
+                    let gridHtml = '<div style="display: flex; flex-direction: column; gap: 6px;">';
                     for (let i = 0; i < 2; i++) {
-                        gridHtml += renderMtrCell(downTrains[i], '屯門方向', destMap);
-                        gridHtml += renderMtrCell(upTrains[i], '烏溪沙方向', destMap);
+                        gridHtml += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">`;
+                        gridHtml += renderMtrCell(downTrains[i], '屯門', destMap);
+                        gridHtml += renderMtrCell(upTrains[i], '烏溪沙', destMap);
+                        gridHtml += `</div>`;
                     }
                     gridHtml += '</div>';
                     
@@ -358,23 +347,20 @@
 
         function renderMtrCell(t, defaultDestName, destMap) {
             if (!t) {
-                return `<div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; font-size: 0.95rem; color: #9ca3af; text-align: center; display: flex; align-items: center; justify-content: center;">暫無班次</div>`;
+                return `<div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; font-size: 0.95rem; color: #9ca3af; text-align: center;">暫無班次</div>`;
             }
             const destName = destMap[t.dest] || t.dest || defaultDestName;
             const trainTime = new Date(t.time.replace(/-/g, '/'));
             const diffMin = Math.round((trainTime - new Date()) / 60000);
             const clockTime = `${String(trainTime.getHours()).padStart(2, '0')}:${String(trainTime.getMinutes()).padStart(2, '0')}`;
-            const timeText = diffMin <= 0 ? '即到' : `${diffMin}分`;
-            const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
+            const timeText = diffMin <= 0 ? '即到' : `${diffMin}分鐘`;
 
             return `
-                <div style="background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                        ${t.plat}台 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">
-                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.2rem;">${timeText}</span>
-                        <span style="color: var(--accent-yellow); font-weight: bold; font-size: 1rem;">${clockTime}</span>
+                <div style="background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; font-weight: bold;">
+                    <span style="color: var(--accent-purple);">${t.plat}台 ${destName}</span>
+                    <div style="display: flex; gap: 8px;">
+                        <span style="color: var(--accent-green);">${timeText}</span>
+                        <span style="color: var(--accent-yellow);">${clockTime}</span>
                     </div>
                 </div>
             `;
@@ -505,7 +491,7 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 6px; font-size: 0.95rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 4px; font-size: 0.95rem;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
