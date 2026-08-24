@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Tablet Dashboard - Big View</title>
+    <title>3008 Tablet Dashboard - Bus 2x2 Max</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -124,7 +124,7 @@
         .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 16px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; white-space: nowrap; }
 
         .status-pill {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             padding: 1px 6px;
             border-radius: 6px;
             font-weight: bold;
@@ -365,8 +365,8 @@
                         ${t.plat}台 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">
-                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.3rem;">${timeText}</span>
-                        <span style="color: var(--accent-yellow); font-weight: bold; font-size: 1.1rem;">${clockTime}</span>
+                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.6rem;">${timeText}</span>
+                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.4rem;">${clockTime}</span>
                     </div>
                 </div>
             `;
@@ -406,7 +406,7 @@
                 const validEtas = etas.filter(e => e.eta).sort((a, b) => new Date(a.eta) - new Date(b.eta));
                 const topEtas = validEtas.slice(0, 4); // 取最多4班
 
-                let gridHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">';
+                let gridHtml = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px;">';
                 for (let j = 0; j < 4; j++) {
                     gridHtml += renderBusEtaCell(topEtas[j], j + 1);
                 }
@@ -451,8 +451,8 @@
                         <span class="status-pill ${tagClass}">${tagText}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-                        <span style="color: ${timeColor}; font-weight: 900; font-size: 1.4rem;">${timeStr}</span>
-                        <span style="color: var(--accent-yellow); font-weight: bold; font-size: 1.2rem;">${clockTime}</span>
+                        <span style="color: ${timeColor}; font-weight: 900; font-size: 1.6rem;">${timeStr}</span>
+                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.4rem;">${clockTime}</span>
                     </div>
                 </div>
             `;
