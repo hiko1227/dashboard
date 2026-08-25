@@ -103,7 +103,7 @@
             animation: warningBlink 1.5s infinite ease-in-out;
         }
 
-        /* 大字版備忘錄 */
+        /* 備忘錄 */
         .memo-input-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .memo-input { flex: 1; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); padding: 12px 16px; border-radius: 10px; color: var(--text-main); font-size: 1.4rem; outline: none; }
         .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px rgba(52,211,153,0.2); }
@@ -120,7 +120,7 @@
 
         .transit-container { display: flex; flex-direction: column; gap: 10px; }
 
-        /* 港鐵 4x1 橫向四格樣式（大字版） */
+        /* 港鐵 4x1 橫排 */
         .mtr-grid-4x1 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -139,15 +139,23 @@
             min-height: 90px;
         }
 
-        /* 交通卡片與大字九巴樣式 */
-        .transit-card {
+        /* 九巴 3 格橫排樣式 */
+        .bus-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .bus-card-box {
             background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 12px;
-            padding: 12px 16px;
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 10px;
+            padding: 10px 4px;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
+            text-align: center;
+            min-height: 85px;
         }
 
         .route-badge { font-size: 1.35rem; font-weight: 900; color: var(--accent-yellow); background: rgba(251, 191, 36, 0.2); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.4); }
@@ -155,10 +163,9 @@
         .transit-input { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); padding: 10px; border-radius: 8px; color: var(--text-main); font-size: 1.15rem; outline: none; }
         .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; font-size: 1.15rem; cursor: pointer; white-space: nowrap; }
 
-        .status-pill { font-size: 0.95rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .status-pill { font-size: 0.85rem; padding: 2px 6px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.2); }
         .pill-active-special { background: rgba(251, 191, 36, 0.3); color: var(--accent-yellow); border-color: rgba(251, 191, 36, 0.6); }
         .pill-active-normal { background: rgba(52, 211, 153, 0.25); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.5); }
-        .pill-dim { background: rgba(255, 255, 255, 0.03); color: #6b7280; opacity: 0.35; }
 
         @media (max-width: 850px) {
             .main-grid { grid-template-columns: 1fr; }
@@ -214,13 +221,12 @@
             
             <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
             
-            <!-- 天氣下面的假期倒數 -->
             <div id="holiday-countdown" style="margin-top: auto; background: rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
                 <span style="font-size: 1.05rem; color: #9ca3af;">計算假期中...</span>
             </div>
         </div>
 
-        <!-- 左下：港鐵恆安站 (4x1 橫排) + 大字版雲端備忘錄 -->
+        <!-- 左下：港鐵恆安站 (4x1 橫排) + 雲端備忘錄 -->
         <div class="panel">
             <div class="transit-container" id="mtr-eta-list">
                 <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">載入港鐵實時資料中...</div>
@@ -240,7 +246,7 @@
             </div>
         </div>
 
-        <!-- 右下：九巴實時到站 (特大字體排版) -->
+        <!-- 右下：九巴實時到站 (2行 x 每行3格班西) -->
         <div class="panel">
             <div class="transit-input-box">
                 <input type="text" id="bus-route-input" class="transit-input" style="width: 70px; text-align: center;" placeholder="路線">
@@ -248,7 +254,7 @@
                 <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
                 <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
             </div>
-            <div class="transit-container" id="bus-eta-list" style="max-height: 320px; overflow-y: auto;">
+            <div class="transit-container" id="bus-eta-list" style="max-height: 340px; overflow-y: auto;">
                 <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">載入巴士資料中...</div>
             </div>
         </div>
@@ -469,10 +475,14 @@
             ];
         }
 
+        /* 九巴：每條路線一行，每行 3 格大字班次 */
         async function fetchBusETA() {
             const container = document.getElementById('bus-eta-list');
             const routes = getStoredBusRoutes();
-            if (routes.length === 0) return;
+            if (routes.length === 0) {
+                container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">請新增巴士路線</div>';
+                return;
+            }
 
             let htmlContent = '';
             for (let i = 0; i < routes.length; i++) {
@@ -487,7 +497,7 @@
                         }
                     }
                     
-                    let etasListHtml = '';
+                    let top3Etas = [];
                     if (etas && etas.length > 0) {
                         const validEtas = etas.filter(e => e.eta);
                         if (validEtas.length > 0) {
@@ -499,40 +509,49 @@
                                     uniqueEtas.push(e);
                                 }
                             });
+                            top3Etas = uniqueEtas.slice(0, 3);
+                        }
+                    }
 
-                            etasListHtml = uniqueEtas.slice(0, 3).map((e, idx) => {
-                                const nextTime = new Date(e.eta);
-                                const diffMin = Math.round((nextTime - new Date()) / 60000);
-                                const timeStr = diffMin <= 1 ? '將到' : `${diffMin}分鐘`;
-                                const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
+                    let boxesHtml = '';
+                    for (let bIdx = 0; bIdx < 3; bIdx++) {
+                        const e = top3Etas[bIdx];
+                        if (e) {
+                            const nextTime = new Date(e.eta);
+                            const diffMin = Math.round((nextTime - new Date()) / 60000);
+                            const timeStr = diffMin <= 1 ? '將到' : `${diffMin} 分`;
+                            const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
 
-                                const rmkText = e.rmk_tc ? e.rmk_tc.trim() : '';
-                                const isSpecial = (e.service_type > 1) || (rmkText !== '' && rmkText !== '原定班次' && rmkText.includes('特別'));
-                                
-                                return `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.35rem; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
-                                        <span style="color: #e5e7eb;">${idx + 1}: <strong style="color: var(--accent-green); font-size: 1.5rem;">${timeStr}</strong> <span style="font-size: 1.1rem; color: #9ca3af;">(${clockTime})</span></span>
-                                        <div style="display: flex; gap: 6px; align-items: center;">
-                                            <span class="status-pill ${isSpecial ? 'pill-active-special' : 'pill-dim'}">特別</span>
-                                            <span class="status-pill ${!isSpecial ? 'pill-active-normal' : 'pill-dim'}">普通</span>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
-                        } else { etasListHtml = '<div style="color: #9ca3af; font-size: 1.2rem; padding: 6px 0;">暫無班次</div>'; }
-                    } else { etasListHtml = '<div style="color: #9ca3af; font-size: 1.2rem; padding: 6px 0;">暫無班次</div>'; }
+                            const rmkText = e.rmk_tc ? e.rmk_tc.trim() : '';
+                            const isSpecial = (e.service_type > 1) || (rmkText !== '' && rmkText !== '原定班次' && rmkText.includes('特別'));
+
+                            boxesHtml += `
+                                <div class="bus-card-box">
+                                    <div style="font-size: 1.6rem; color: var(--accent-green); font-weight: 900;">${timeStr}</div>
+                                    <div style="font-size: 1.1rem; color: var(--accent-yellow); font-weight: bold; margin: 2px 0;">${clockTime}</div>
+                                    <span class="status-pill ${isSpecial ? 'pill-active-special' : 'pill-active-normal'}">${isSpecial ? '特別' : '普通'}</span>
+                                </div>
+                            `;
+                        } else {
+                            boxesHtml += `
+                                <div class="bus-card-box" style="opacity: 0.35; justify-content: center;">
+                                    <span style="font-size: 0.95rem; color: #9ca3af;">無班次</span>
+                                </div>
+                            `;
+                        }
+                    }
 
                     htmlContent += `
-                        <div class="transit-card">
-                            <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <span class="route-badge">${r.route}</span>
-                                        ${r.name ? `<span style="font-size: 1.3rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
-                                    </div>
-                                    <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:var(--accent-red); cursor:pointer; font-weight:bold; font-size: 1.3rem;">✕</button>
+                        <div style="background: rgba(0,0,0,0.2); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="route-badge">${r.route}</span>
+                                    ${r.name ? `<span style="font-size: 1.25rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                                 </div>
-                                <div>${etasListHtml}</div>
+                                <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:var(--accent-red); cursor:pointer; font-weight:bold; font-size: 1.3rem;">✕</button>
+                            </div>
+                            <div class="bus-grid-3">
+                                ${boxesHtml}
                             </div>
                         </div>
                     `;
