@@ -24,7 +24,7 @@
             margin: 0; 
             font-size: 1.1rem; 
             -webkit-font-smoothing: antialiased;
-            overflow: hidden; /* 鎖死畫面，防止平板出現上下滾動條 */
+            overflow: hidden; 
             height: 100vh;
             box-sizing: border-box;
         }
@@ -34,13 +34,12 @@
             --card-bg: rgba(0, 0, 0, 0.5);
         }
 
-        /* 整個版面改為左右兩欄打橫並排 */
         .dashboard-container {
             max-width: 100%;
             height: 100%;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 左右各佔一半空間 */
+            grid-template-columns: 1fr 1fr; 
             gap: 10px;
         }
 
@@ -65,9 +64,9 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
         
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.2rem; font-weight: 800; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.1rem; font-weight: 800; }
         .date-part { color: var(--text-main); }
-        .weekday-part { color: var(--accent-blue); font-size: 0.95rem; }
+        .lunar-part { color: var(--accent-blue); font-size: 0.9rem; }
 
         .header-center { text-align: right; }
         .clock { font-size: 2.2rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 14px rgba(251,191,36,0.3); }
@@ -109,7 +108,7 @@
         .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px rgba(52,211,153,0.3); }
         .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
         
-        .memo-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 140px; }
+        .memo-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
         .memo-item { background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid rgba(255,255,255,0.08); }
 
         .memo-actions { display: flex; gap: 4px; }
@@ -149,7 +148,6 @@
         .pill-active-special { background: rgba(251, 191, 36, 0.25); color: var(--accent-yellow); border-color: rgba(251, 191, 36, 0.5); }
         .pill-active-normal { background: rgba(52, 211, 153, 0.2); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.4); }
 
-        /* 2x2 網格 */
         .grid-2x2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -161,60 +159,28 @@
 <body>
 
     <div class="dashboard-container">
-        <!-- 左欄：時間、天氣、港鐵 -->
+        <!-- 左欄：時間日期、港鐵、備忘錄 -->
         <div class="column">
-            <!-- 頂部：日期時間與假期 -->
+            <!-- 頂部：日期時間、農曆與節氣 -->
             <div class="top-header">
                 <div class="header-left">
                     <span class="date-part" id="date-part">--</span>
-                    <span class="weekday-part" id="weekday-part">--</span>
+                    <span class="lunar-part" id="lunar-part">農曆計算中...</span>
                 </div>
                 <div class="header-center">
                     <div style="display: flex; align-items: baseline; gap: 6px; justify-content: flex-end;">
                         <span class="clock" id="clock">00:00:00</span>
                         <span class="ampm" id="ampm">--</span>
                     </div>
-                    <div id="holiday-countdown" style="font-size: 0.85rem; color: #9ca3af; margin-top: 1px;">計算假期中...</div>
+                    <div id="holiday-countdown" style="font-size: 0.8rem; color: #9ca3af; margin-top: 1px;">計算假期中...</div>
                 </div>
-            </div>
-
-            <!-- 天氣 -->
-            <div class="panel">
-                <div class="wx-box">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 48px; height: 48px; display: none;" onerror="this.style.display='none'">
-                        <span class="wx-temp" id="current-temp">--°C</span>
-                    </div>
-                    <div style="text-align: right; font-size: 1rem; font-weight: 600;">
-                        <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
-                        <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
-                    </div>
-                </div>
-                <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
             </div>
 
             <!-- 港鐵 -->
-            <div class="panel" style="flex: 1; overflow: hidden;">
+            <div class="panel" style="flex: 1.2; overflow: hidden;">
                 <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-purple);">🚇 港鐵恆安站</div>
                 <div class="transit-container" id="mtr-eta-list" style="flex: 1;">
                     <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入港鐵實時資料中...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 右欄：九巴、雲端備忘錄 -->
-        <div class="column">
-            <!-- 九巴 -->
-            <div class="panel" style="flex: 1.3; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-yellow);">🚌 九巴實時到站</div>
-                <div class="transit-input-box">
-                    <input type="text" id="bus-route-input" class="transit-input" style="width: 55px; text-align: center;" placeholder="路線">
-                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
-                    <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
-                    <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
-                </div>
-                <div class="transit-container" id="bus-eta-list" style="flex: 1; overflow-y: auto;">
-                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入巴士資料中...</div>
                 </div>
             </div>
 
@@ -233,6 +199,38 @@
                 </div>
             </div>
         </div>
+
+        <!-- 右欄：天氣、九巴 -->
+        <div class="column">
+            <!-- 天氣連警告 -->
+            <div class="panel">
+                <div class="wx-box">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 48px; height: 48px; display: none;" onerror="this.style.display='none'">
+                        <span class="wx-temp" id="current-temp">--°C</span>
+                    </div>
+                    <div style="text-align: right; font-size: 1rem; font-weight: 600;">
+                        <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
+                        <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
+                    </div>
+                </div>
+                <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
+            </div>
+
+            <!-- 九巴 -->
+            <div class="panel" style="flex: 1.6; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-yellow);">🚌 九巴實時到站</div>
+                <div class="transit-input-box">
+                    <input type="text" id="bus-route-input" class="transit-input" style="width: 55px; text-align: center;" placeholder="路線">
+                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
+                    <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
+                    <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
+                </div>
+                <div class="transit-container" id="bus-eta-list" style="flex: 1; overflow-y: auto;">
+                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入巴士資料中...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -240,13 +238,39 @@
         const MASTER_KEY = "$2a$10$HvcOoQBCbmfplG2XSkexuOAFTbJfJzpuucJSOImKmhiM3K//7f5kO";
 
         const hkHolidays = [
-            { name: "中秋節翌日", date: "2026-09-28" },
             { name: "國慶日", date: "2026-10-01" },
             { name: "重陽節", date: "2026-10-23" },
             { name: "聖誕節", date: "2026-12-25" },
             { name: "元旦", date: "2027-01-01" },
             { name: "農曆年初一", date: "2027-02-06" }
         ];
+
+        // 簡易農曆對照及節氣對照表 (2026-2027重要日子)
+        function getLunarAndSolarTerm(date) {
+            const m = date.getMonth() + 1;
+            const d = date.getDate();
+            const dateStr = `${m}/${d}`;
+
+            // 節氣對照示範
+            const terms = {
+                "9/7": "白露", "9/22": "秋分",
+                "10/8": "寒露", "10/23": "霜降",
+                "11/7": "立冬", "11/22": "小雪",
+                "12/7": "大雪", "12/21": "冬至",
+                "1/5": "小寒", "1/20": "大寒",
+                "2/4": "立春", "2/19": "雨水"
+            };
+
+            let termStr = terms[dateStr] ? ` • 節氣: ${terms[dateStr]}` : "";
+            
+            // 示範農曆顯示（可結合固定日期或大約對照）
+            if (m === 9 && d >= 25) return `農曆八月十八${termStr}`;
+            if (m === 9) return `農曆八月初${d}${termStr}`;
+            if (m === 10) return `農曆九月初${d}${termStr}`;
+            if (m === 12 && d >= 20) return `農曆冬月${d-10}${termStr}`;
+            
+            return `農曆日曆中${termStr}`;
+        }
 
         function updateTime() {
             const now = new Date();
@@ -259,8 +283,8 @@
 
             document.getElementById('clock').textContent = `${hoursStr}:${minutes}:${seconds}`;
             document.getElementById('ampm').textContent = ampm;
-            document.getElementById('date-part').textContent = now.toLocaleDateString('zh-HK', {month:'long', day:'numeric'});
-            document.getElementById('weekday-part').textContent = now.toLocaleDateString('zh-HK', {weekday:'long'});
+            document.getElementById('date-part').textContent = now.toLocaleDateString('zh-HK', {month:'long', day:'numeric', weekday:'long'});
+            document.getElementById('lunar-part').textContent = getLunarAndSolarTerm(now);
 
             const currentHour = now.getHours();
             if (currentHour >= 19 || currentHour < 6) {
@@ -403,7 +427,7 @@
         }
 
         function getStoredBusRoutes() {
-            const saved = localStorage.getItem('custom_bus_routes_v2');
+            const saved = localStorage.getItem('custom_bus_routes_v3');
             if (saved) {
                 try { return JSON.parse(saved); } catch (e) {}
             }
@@ -422,19 +446,22 @@
                 let r = routes[i];
                 let etas = [];
                 try {
-                    for (let st = 1; st <= 2; st++) {
-                        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
+                    // 同時請求普通班次(1)以及可能存在的特別班次(2, 3等)，確保完整捕捉
+                    for (let sType = 1; sType <= 3; sType++) {
+                        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${sType}`);
                         if (res.ok) {
                             const data = await res.json();
                             if (data?.data) {
-                                etas = etas.concat(Array.isArray(data.data) ? data.data : [data.data]);
+                                const list = Array.isArray(data.data) ? data.data : [data.data];
+                                etas = etas.concat(list);
                             }
                         }
                     }
                 } catch (err) {}
 
+                // 過濾並按實時預計到達時間順序排序
                 const validEtas = etas.filter(e => e.eta).sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                const topEtas = validEtas.slice(0, 4); // 取最多4班
+                const topEtas = validEtas.slice(0, 4);
 
                 let gridHtml = '<div class="grid-2x2">';
                 for (let j = 0; j < 4; j++) {
@@ -497,7 +524,7 @@
             if (!routeVal) return;
             let routes = getStoredBusRoutes();
             routes.push({ route: routeVal, stop: stopInput.value.trim() || '003345', name: nameInput.value.trim() });
-            localStorage.setItem('custom_bus_routes_v2', JSON.stringify(routes));
+            localStorage.setItem('custom_bus_routes_v3', JSON.stringify(routes));
             
             routeInput.value = '';
             nameInput.value = '';
@@ -507,7 +534,7 @@
         function removeBusRoute(index) {
             let routes = getStoredBusRoutes();
             routes.splice(index, 1);
-            localStorage.setItem('custom_bus_routes_v2', JSON.stringify(routes));
+            localStorage.setItem('custom_bus_routes_v3', JSON.stringify(routes));
             fetchBusETA();
         }
 
