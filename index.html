@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Tablet Dashboard - Landscape Mode</title>
+    <title>3008 Tablet Dashboard - Big View</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -20,13 +20,10 @@
             background-color: var(--bg-color); 
             color: var(--text-main); 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            padding: 10px; 
+            padding: 12px; 
             margin: 0; 
-            font-size: 1.1rem; 
+            font-size: 1.3rem; 
             -webkit-font-smoothing: antialiased;
-            overflow: hidden; 
-            height: 100vh;
-            box-sizing: border-box;
         }
 
         body.night-mode {
@@ -35,200 +32,175 @@
         }
 
         .dashboard-container {
-            max-width: 100%;
-            height: 100%;
+            max-width: 700px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px;
-        }
-
-        .column {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            height: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
+            gap: 12px;
         }
 
         .top-header { 
             background: var(--card-bg); 
-            padding: 10px 14px; 
-            border-radius: 12px; 
+            padding: 16px 20px; 
+            border-radius: 16px; 
             border: 1px solid rgba(255,255,255,0.12); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             backdrop-filter: blur(16px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.4);
         }
         
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.1rem; font-weight: 800; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.4rem; font-weight: 800; }
         .date-part { color: var(--text-main); }
-        .lunar-part { color: var(--accent-blue); font-size: 0.9rem; }
+        .weekday-part { color: var(--accent-blue); font-size: 1.1rem; }
 
         .header-center { text-align: right; }
-        .clock { font-size: 2.2rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 14px rgba(251,191,36,0.3); }
-        .ampm { font-size: 0.9rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; }
+        .clock { font-size: 2.8rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 16px rgba(251,191,36,0.3); }
+        .ampm { font-size: 1.1rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; }
 
         .panel { 
             background: var(--card-bg); 
-            padding: 10px 14px; 
-            border-radius: 12px; 
+            padding: 16px 20px; 
+            border-radius: 16px; 
             border: 1px solid rgba(52, 211, 153, 0.25); 
             backdrop-filter: blur(16px); 
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.4);
         }
 
         .wx-box { display: flex; align-items: center; justify-content: space-between; }
-        .wx-temp { font-size: 2.5rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
+        .wx-temp { font-size: 3.2rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
 
         @keyframes warningBlink {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
-        .warning-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .warning-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .warning-badge {
             background: rgba(248, 113, 113, 0.25);
             color: var(--accent-red);
             border: 1px solid rgba(248, 113, 113, 0.6);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
             font-weight: bold;
             animation: warningBlink 1.5s infinite ease-in-out;
         }
 
-        .memo-input-box { display: flex; gap: 6px; margin-bottom: 8px; }
-        .memo-input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 8px; color: #fff; font-size: 1rem; outline: none; }
-        .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px rgba(52,211,153,0.3); }
-        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .memo-input-box { display: flex; gap: 8px; margin-bottom: 12px; }
+        .memo-input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 10px 14px; border-radius: 10px; color: #fff; font-size: 1.2rem; outline: none; }
+        .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 10px rgba(52,211,153,0.3); }
+        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 18px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
         
-        .memo-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
-        .memo-item { background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid rgba(255,255,255,0.08); }
+        .memo-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+        .memo-item { background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; gap: 8px; border: 1px solid rgba(255,255,255,0.08); }
 
-        .memo-actions { display: flex; gap: 4px; }
-        .memo-action-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
-        .memo-delete { color: #f87171; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.1rem; padding: 0 2px; }
-        .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+        .memo-actions { display: flex; gap: 6px; }
+        .memo-action-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        .memo-delete { color: #f87171; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.3rem; padding: 0 4px; }
+        .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
 
-        .transit-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+        .transit-container { display: flex; flex-direction: column; gap: 10px; }
         .transit-card {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 10px;
-            padding: 8px 10px;
+            border-radius: 12px;
+            padding: 12px 14px;
         }
 
         .route-badge {
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: 900;
             color: var(--accent-yellow);
             background: rgba(251, 191, 36, 0.2);
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 6px;
             border: 1px solid rgba(251, 191, 36, 0.4);
         }
 
-        .transit-input-box { display: flex; gap: 6px; margin-bottom: 8px; }
-        .transit-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 5px 8px; border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none; }
-        .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 12px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
+        .transit-input-box { display: flex; gap: 8px; margin-bottom: 12px; }
+        .transit-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 10px; color: #fff; font-size: 1.1rem; outline: none; }
+        .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 16px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; white-space: nowrap; }
 
         .status-pill {
-            font-size: 0.75rem;
-            padding: 1px 5px;
-            border-radius: 4px;
+            font-size: 0.9rem;
+            padding: 2px 8px;
+            border-radius: 6px;
             font-weight: bold;
             border: 1px solid transparent;
         }
         .pill-active-special { background: rgba(251, 191, 36, 0.25); color: var(--accent-yellow); border-color: rgba(251, 191, 36, 0.5); }
         .pill-active-normal { background: rgba(52, 211, 153, 0.2); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.4); }
-
-        .grid-2x2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-top: 6px;
-        }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
-        <!-- 左欄：時間日期、港鐵、備忘錄 -->
-        <div class="column">
-            <!-- 頂部：日期時間、農曆與節氣 -->
-            <div class="top-header">
-                <div class="header-left">
-                    <span class="date-part" id="date-part">--</span>
-                    <span class="lunar-part" id="lunar-part">農曆計算中...</span>
-                </div>
-                <div class="header-center">
-                    <div style="display: flex; align-items: baseline; gap: 6px; justify-content: flex-end;">
-                        <span class="clock" id="clock">00:00:00</span>
-                        <span class="ampm" id="ampm">--</span>
-                    </div>
-                    <div id="holiday-countdown" style="font-size: 0.8rem; color: #9ca3af; margin-top: 1px;">計算假期中...</div>
-                </div>
+        <!-- 頂部：日期時間與假期 -->
+        <div class="top-header">
+            <div class="header-left">
+                <span class="date-part" id="date-part">--</span>
+                <span class="weekday-part" id="weekday-part">--</span>
             </div>
-
-            <!-- 港鐵 -->
-            <div class="panel" style="flex: 1.2; overflow: hidden;">
-                <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-purple);">🚇 港鐵恆安站</div>
-                <div class="transit-container" id="mtr-eta-list" style="flex: 1;">
-                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入港鐵實時資料中...</div>
+            <div class="header-center">
+                <div style="display: flex; align-items: baseline; gap: 8px; justify-content: flex-end;">
+                    <span class="clock" id="clock">00:00:00</span>
+                    <span class="ampm" id="ampm">--</span>
                 </div>
-            </div>
-
-            <!-- 雲端備忘錄 -->
-            <div class="panel" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 1.05rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
-                    <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
-                </div>
-                <div class="memo-input-box">
-                    <input type="text" id="memo-input" class="memo-input" placeholder="輸入備忘..." onkeypress="if(event.key==='Enter')addMemo()">
-                    <button class="memo-btn" onclick="addMemo()">新增</button>
-                </div>
-                <div class="memo-list" id="memo-list" style="flex: 1;">
-                    <div style="color: #9ca3af; text-align: center; padding: 8px; font-size: 0.95rem;">正在連接雲端...</div>
-                </div>
+                <div id="holiday-countdown" style="font-size: 1rem; color: #9ca3af; margin-top: 2px;">計算假期中...</div>
             </div>
         </div>
 
-        <!-- 右欄：天氣、九巴 -->
-        <div class="column">
-            <!-- 天氣連警告 -->
-            <div class="panel">
-                <div class="wx-box">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 48px; height: 48px; display: none;" onerror="this.style.display='none'">
-                        <span class="wx-temp" id="current-temp">--°C</span>
-                    </div>
-                    <div style="text-align: right; font-size: 1rem; font-weight: 600;">
-                        <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
-                        <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
-                    </div>
+        <!-- 天氣 -->
+        <div class="panel">
+            <div class="wx-box">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 64px; height: 64px; display: none;" onerror="this.style.display='none'">
+                    <span class="wx-temp" id="current-temp">--°C</span>
                 </div>
-                <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
+                <div style="text-align: right; font-size: 1.2rem; font-weight: 600;">
+                    <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
+                    <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
+                </div>
             </div>
+            <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
+        </div>
 
-            <!-- 九巴 -->
-            <div class="panel" style="flex: 1.6; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-yellow);">🚌 九巴實時到站</div>
-                <div class="transit-input-box">
-                    <input type="text" id="bus-route-input" class="transit-input" style="width: 55px; text-align: center;" placeholder="路線">
-                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
-                    <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
-                    <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
-                </div>
-                <div class="transit-container" id="bus-eta-list" style="flex: 1; overflow-y: auto;">
-                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入巴士資料中...</div>
-                </div>
+        <!-- 九巴 -->
+        <div class="panel">
+            <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-yellow);">🚌 九巴實時到站</div>
+            <div class="transit-input-box">
+                <input type="text" id="bus-route-input" class="transit-input" style="width: 70px; text-align: center;" placeholder="路線">
+                <input type="text" id="bus-stop-input" class="transit-input" style="width: 90px; text-align: center;" placeholder="站ID" value="003345">
+                <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
+                <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
+            </div>
+            <div class="transit-container" id="bus-eta-list">
+                <div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.1rem;">載入巴士資料中...</div>
+            </div>
+        </div>
+
+        <!-- 港鐵 -->
+        <div class="panel">
+            <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-purple);">🚇 港鐵恆安站</div>
+            <div class="transit-container" id="mtr-eta-list">
+                <div style="color: #9ca3af; text-align: center; padding: 12px; font-size: 1.1rem;">載入港鐵實時資料中...</div>
+            </div>
+        </div>
+
+        <!-- 雲端備忘錄 -->
+        <div class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
+                <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
+            </div>
+            <div class="memo-input-box">
+                <input type="text" id="memo-input" class="memo-input" placeholder="輸入備忘..." onkeypress="if(event.key==='Enter')addMemo()">
+                <button class="memo-btn" onclick="addMemo()">新增</button>
+            </div>
+            <div class="memo-list" id="memo-list">
+                <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">正在連接雲端...</div>
             </div>
         </div>
     </div>
@@ -238,39 +210,13 @@
         const MASTER_KEY = "$2a$10$HvcOoQBCbmfplG2XSkexuOAFTbJfJzpuucJSOImKmhiM3K//7f5kO";
 
         const hkHolidays = [
+            { name: "中秋節翌日", date: "2026-09-28" },
             { name: "國慶日", date: "2026-10-01" },
             { name: "重陽節", date: "2026-10-23" },
             { name: "聖誕節", date: "2026-12-25" },
             { name: "元旦", date: "2027-01-01" },
             { name: "農曆年初一", date: "2027-02-06" }
         ];
-
-        // 簡易農曆對照及節氣對照表 (2026-2027重要日子)
-        function getLunarAndSolarTerm(date) {
-            const m = date.getMonth() + 1;
-            const d = date.getDate();
-            const dateStr = `${m}/${d}`;
-
-            // 節氣對照示範
-            const terms = {
-                "9/7": "白露", "9/22": "秋分",
-                "10/8": "寒露", "10/23": "霜降",
-                "11/7": "立冬", "11/22": "小雪",
-                "12/7": "大雪", "12/21": "冬至",
-                "1/5": "小寒", "1/20": "大寒",
-                "2/4": "立春", "2/19": "雨水"
-            };
-
-            let termStr = terms[dateStr] ? ` • 節氣: ${terms[dateStr]}` : "";
-            
-            // 示範農曆顯示（可結合固定日期或大約對照）
-            if (m === 9 && d >= 25) return `農曆八月十八${termStr}`;
-            if (m === 9) return `農曆八月初${d}${termStr}`;
-            if (m === 10) return `農曆九月初${d}${termStr}`;
-            if (m === 12 && d >= 20) return `農曆冬月${d-10}${termStr}`;
-            
-            return `農曆日曆中${termStr}`;
-        }
 
         function updateTime() {
             const now = new Date();
@@ -283,8 +229,8 @@
 
             document.getElementById('clock').textContent = `${hoursStr}:${minutes}:${seconds}`;
             document.getElementById('ampm').textContent = ampm;
-            document.getElementById('date-part').textContent = now.toLocaleDateString('zh-HK', {month:'long', day:'numeric', weekday:'long'});
-            document.getElementById('lunar-part').textContent = getLunarAndSolarTerm(now);
+            document.getElementById('date-part').textContent = now.toLocaleDateString('zh-HK', {month:'long', day:'numeric'});
+            document.getElementById('weekday-part').textContent = now.toLocaleDateString('zh-HK', {weekday:'long'});
 
             const currentHour = now.getHours();
             if (currentHour >= 19 || currentHour < 6) {
@@ -382,7 +328,7 @@
                 if (json.status === 1 && json.data) {
                     const stationData = json.data['TML-HEO'];
                     if (!stationData) {
-                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px;">暫無列車資料</div>';
+                        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 8px;">暫無列車資料</div>';
                         return;
                     }
 
@@ -390,7 +336,7 @@
                     const upTrains = (stationData.UP || []).slice(0, 2);
                     const destMap = { 'WKS': '烏溪沙', 'MOS': '馬鞍山', 'TUM': '屯門', 'HUH': '紅磡' };
 
-                    let gridHtml = '<div class="grid-2x2">';
+                    let gridHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">';
                     for (let i = 0; i < 2; i++) {
                         gridHtml += renderMtrCell(downTrains[i], '屯門', destMap);
                         gridHtml += renderMtrCell(upTrains[i], '烏溪沙', destMap);
@@ -404,7 +350,7 @@
 
         function renderMtrCell(t, defaultDestName, destMap) {
             if (!t) {
-                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 6px; font-size: 0.85rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center;">暫無班次</div>`;
+                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; font-size: 1rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center;">暫無班次</div>`;
             }
             const destName = destMap[t.dest] || t.dest || defaultDestName;
             const trainTime = new Date(t.time.replace(/-/g, '/'));
@@ -414,20 +360,20 @@
             const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
 
             return `
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(192,132,252,0.3); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div style="font-size: 0.8rem; color: #9ca3af;">
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(192,132,252,0.3); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="font-size: 0.95rem; color: #9ca3af;">
                         ${t.plat}台 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px;">
-                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.4rem;">${timeText}</span>
-                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.2rem;">${clockTime}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">
+                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.3rem;">${timeText}</span>
+                        <span style="color: var(--accent-yellow); font-weight: bold; font-size: 1.1rem;">${clockTime}</span>
                     </div>
                 </div>
             `;
         }
 
         function getStoredBusRoutes() {
-            const saved = localStorage.getItem('custom_bus_routes_v3');
+            const saved = localStorage.getItem('custom_bus_routes_v2');
             if (saved) {
                 try { return JSON.parse(saved); } catch (e) {}
             }
@@ -446,73 +392,62 @@
                 let r = routes[i];
                 let etas = [];
                 try {
-                    // 同時請求普通班次(1)以及可能存在的特別班次(2, 3等)，確保完整捕捉
-                    for (let sType = 1; sType <= 3; sType++) {
-                        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${sType}`);
+                    for (let st = 1; st <= 2; st++) {
+                        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${st}`);
                         if (res.ok) {
                             const data = await res.json();
                             if (data?.data) {
-                                const list = Array.isArray(data.data) ? data.data : [data.data];
-                                etas = etas.concat(list);
+                                etas = etas.concat(Array.isArray(data.data) ? data.data : [data.data]);
                             }
                         }
                     }
                 } catch (err) {}
 
-                // 過濾並按實時預計到達時間順序排序
+                let etasListHtml = '';
                 const validEtas = etas.filter(e => e.eta).sort((a, b) => new Date(a.eta) - new Date(b.eta));
-                const topEtas = validEtas.slice(0, 4);
+                if (validEtas.length > 0) {
+                    const topEtas = validEtas.slice(0, 3);
+                    etasListHtml = topEtas.map((e, idx) => {
+                        const nextTime = new Date(e.eta);
+                        const diffMin = Math.round((nextTime - new Date()) / 60000);
+                        const timeStr = diffMin <= 1 ? '將到' : `${diffMin}分鐘`;
+                        const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
 
-                let gridHtml = '<div class="grid-2x2">';
-                for (let j = 0; j < 4; j++) {
-                    gridHtml += renderBusEtaCell(topEtas[j], j + 1);
+                        const rmkText = (e.rmk_tc || '').trim();
+                        const isSpecial = (e.service_type && e.service_type > 1) || (rmkText !== '');
+                        
+                        // 原定班次綠色，特別班次黃色
+                        const timeColor = isSpecial ? 'var(--accent-yellow)' : 'var(--accent-green)';
+                        
+                        // 標籤顯示內容與對應顏色
+                        const tagText = rmkText || (isSpecial ? '特別班次' : '普通');
+                        const tagClass = isSpecial ? 'pill-active-special' : 'pill-active-normal';
+
+                        return `
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
+                                <span style="color: #9ca3af;">${idx + 1}: <strong style="color: ${timeColor}; font-size: 1.2rem;">${timeStr}</strong> <span style="font-size: 1rem;">(${clockTime})</span></span>
+                                <div><span class="status-pill ${tagClass}">${tagText}</span></div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    etasListHtml = '<div style="color: #9ca3af; font-size: 1.1rem; margin-top: 6px;">暫無班次</div>';
                 }
-                gridHtml += '</div>';
 
                 htmlContent += `
                     <div class="transit-card">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
                                 <span class="route-badge">${r.route}</span>
-                                ${r.name ? `<span style="font-size: 0.9rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
+                                ${r.name ? `<span style="font-size: 1.1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                             </div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.3rem;">✕</button>
                         </div>
-                        <div>${gridHtml}</div>
+                        <div>${etasListHtml}</div>
                     </div>
                 `;
             }
             container.innerHTML = htmlContent;
-        }
-
-        function renderBusEtaCell(e, index) {
-            if (!e) {
-                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 6px; font-size: 0.85rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 46px;">暫無班次</div>`;
-            }
-            const nextTime = new Date(e.eta);
-            const diffMin = Math.round((nextTime - new Date()) / 60000);
-            const timeStr = diffMin <= 1 ? '即到' : `${diffMin}分`;
-            const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
-
-            const rmkText = (e.rmk_tc || '').trim();
-            const isSpecial = (e.service_type && e.service_type > 1) || (rmkText !== '');
-            
-            const timeColor = isSpecial ? 'var(--accent-yellow)' : 'var(--accent-green)';
-            const tagText = rmkText || (isSpecial ? '特別' : '普通');
-            const tagClass = isSpecial ? 'pill-active-special' : 'pill-active-normal';
-
-            return `
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; padding: 5px 6px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #9ca3af;">
-                        <span>#${index}</span>
-                        <span class="status-pill ${tagClass}">${tagText}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px;">
-                        <span style="color: ${timeColor}; font-weight: 900; font-size: 1.4rem;">${timeStr}</span>
-                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.2rem;">${clockTime}</span>
-                    </div>
-                </div>
-            `;
         }
 
         function addBusRoute() {
@@ -524,7 +459,7 @@
             if (!routeVal) return;
             let routes = getStoredBusRoutes();
             routes.push({ route: routeVal, stop: stopInput.value.trim() || '003345', name: nameInput.value.trim() });
-            localStorage.setItem('custom_bus_routes_v3', JSON.stringify(routes));
+            localStorage.setItem('custom_bus_routes_v2', JSON.stringify(routes));
             
             routeInput.value = '';
             nameInput.value = '';
@@ -534,7 +469,7 @@
         function removeBusRoute(index) {
             let routes = getStoredBusRoutes();
             routes.splice(index, 1);
-            localStorage.setItem('custom_bus_routes_v3', JSON.stringify(routes));
+            localStorage.setItem('custom_bus_routes_v2', JSON.stringify(routes));
             fetchBusETA();
         }
 
@@ -566,7 +501,7 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 8px; font-size: 0.95rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
