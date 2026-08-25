@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>3008 Tablet Dashboard - Perfect Fit</title>
+    <title>3008 Tablet Dashboard - Landscape Mode</title>
     <style>
         :root { 
             --bg-color: #0b0f19; 
@@ -22,8 +22,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             padding: 10px; 
             margin: 0; 
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             -webkit-font-smoothing: antialiased;
+            overflow: hidden; /* 鎖死畫面，防止平板出現上下滾動條 */
+            height: 100vh;
+            box-sizing: border-box;
         }
 
         body.night-mode {
@@ -31,86 +34,99 @@
             --card-bg: rgba(0, 0, 0, 0.5);
         }
 
+        /* 整個版面改為左右兩欄打橫並排 */
         .dashboard-container {
-            max-width: 700px;
+            max-width: 100%;
+            height: 100%;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 左右各佔一半空間 */
+            gap: 10px;
+        }
+
+        .column {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .top-header { 
             background: var(--card-bg); 
-            padding: 12px 16px; 
-            border-radius: 14px; 
+            padding: 10px 14px; 
+            border-radius: 12px; 
             border: 1px solid rgba(255,255,255,0.12); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             backdrop-filter: blur(16px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
         
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.3rem; font-weight: 800; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 1.2rem; font-weight: 800; }
         .date-part { color: var(--text-main); }
-        .weekday-part { color: var(--accent-blue); font-size: 1rem; }
+        .weekday-part { color: var(--accent-blue); font-size: 0.95rem; }
 
         .header-center { text-align: right; }
-        .clock { font-size: 2.5rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 16px rgba(251,191,36,0.3); }
-        .ampm { font-size: 1rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; }
+        .clock { font-size: 2.2rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; text-shadow: 0 0 14px rgba(251,191,36,0.3); }
+        .ampm { font-size: 0.9rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; }
 
         .panel { 
             background: var(--card-bg); 
-            padding: 12px 16px; 
-            border-radius: 14px; 
+            padding: 10px 14px; 
+            border-radius: 12px; 
             border: 1px solid rgba(52, 211, 153, 0.25); 
             backdrop-filter: blur(16px); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
         }
 
         .wx-box { display: flex; align-items: center; justify-content: space-between; }
-        .wx-temp { font-size: 2.8rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
+        .wx-temp { font-size: 2.5rem; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
 
         @keyframes warningBlink {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
-        .warning-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .warning-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
         .warning-badge {
             background: rgba(248, 113, 113, 0.25);
             color: var(--accent-red);
             border: 1px solid rgba(248, 113, 113, 0.6);
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
             font-weight: bold;
             animation: warningBlink 1.5s infinite ease-in-out;
         }
 
-        .memo-input-box { display: flex; gap: 8px; margin-bottom: 10px; }
-        .memo-input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 10px; color: #fff; font-size: 1.1rem; outline: none; }
-        .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 10px rgba(52,211,153,0.3); }
-        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 16px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        .memo-input-box { display: flex; gap: 6px; margin-bottom: 8px; }
+        .memo-input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 8px; color: #fff; font-size: 1rem; outline: none; }
+        .memo-input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px rgba(52,211,153,0.3); }
+        .memo-btn { background: var(--accent-green); color: #0b0f19; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
         
-        .memo-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
-        .memo-item { background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; font-weight: 600; gap: 8px; border: 1px solid rgba(255,255,255,0.08); }
+        .memo-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 140px; }
+        .memo-item { background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; gap: 6px; border: 1px solid rgba(255,255,255,0.08); }
 
-        .memo-actions { display: flex; gap: 6px; }
-        .memo-action-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-        .memo-delete { color: #f87171; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.2rem; padding: 0 4px; }
-        .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; }
+        .memo-actions { display: flex; gap: 4px; }
+        .memo-action-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .memo-delete { color: #f87171; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.1rem; padding: 0 2px; }
+        .refresh-memo-btn { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        .transit-container { display: flex; flex-direction: column; gap: 8px; }
+        .transit-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
         .transit-card {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 12px;
-            padding: 10px 12px;
+            border-radius: 10px;
+            padding: 8px 10px;
         }
 
         .route-badge {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 900;
             color: var(--accent-yellow);
             background: rgba(251, 191, 36, 0.2);
@@ -119,96 +135,102 @@
             border: 1px solid rgba(251, 191, 36, 0.4);
         }
 
-        .transit-input-box { display: flex; gap: 8px; margin-bottom: 10px; }
-        .transit-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 10px; color: #fff; font-size: 1rem; outline: none; }
-        .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 14px; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; white-space: nowrap; }
+        .transit-input-box { display: flex; gap: 6px; margin-bottom: 8px; }
+        .transit-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 5px 8px; border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none; }
+        .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 12px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
 
         .status-pill {
-            font-size: 0.8rem;
-            padding: 1px 6px;
-            border-radius: 6px;
+            font-size: 0.75rem;
+            padding: 1px 5px;
+            border-radius: 4px;
             font-weight: bold;
             border: 1px solid transparent;
         }
         .pill-active-special { background: rgba(251, 191, 36, 0.25); color: var(--accent-yellow); border-color: rgba(251, 191, 36, 0.5); }
         .pill-active-normal { background: rgba(52, 211, 153, 0.2); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.4); }
 
-        /* 2x2 網格絕對不超出畫面 */
+        /* 2x2 網格 */
         .grid-2x2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 6px;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
-        <!-- 頂部：日期時間與假期 -->
-        <div class="top-header">
-            <div class="header-left">
-                <span class="date-part" id="date-part">--</span>
-                <span class="weekday-part" id="weekday-part">--</span>
-            </div>
-            <div class="header-center">
-                <div style="display: flex; align-items: baseline; gap: 8px; justify-content: flex-end;">
-                    <span class="clock" id="clock">00:00:00</span>
-                    <span class="ampm" id="ampm">--</span>
+        <!-- 左欄：時間、天氣、港鐵 -->
+        <div class="column">
+            <!-- 頂部：日期時間與假期 -->
+            <div class="top-header">
+                <div class="header-left">
+                    <span class="date-part" id="date-part">--</span>
+                    <span class="weekday-part" id="weekday-part">--</span>
                 </div>
-                <div id="holiday-countdown" style="font-size: 0.9rem; color: #9ca3af; margin-top: 2px;">計算假期中...</div>
-            </div>
-        </div>
-
-        <!-- 天氣 -->
-        <div class="panel">
-            <div class="wx-box">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 56px; height: 56px; display: none;" onerror="this.style.display='none'">
-                    <span class="wx-temp" id="current-temp">--°C</span>
-                </div>
-                <div style="text-align: right; font-size: 1.1rem; font-weight: 600;">
-                    <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
-                    <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
+                <div class="header-center">
+                    <div style="display: flex; align-items: baseline; gap: 6px; justify-content: flex-end;">
+                        <span class="clock" id="clock">00:00:00</span>
+                        <span class="ampm" id="ampm">--</span>
+                    </div>
+                    <div id="holiday-countdown" style="font-size: 0.85rem; color: #9ca3af; margin-top: 1px;">計算假期中...</div>
                 </div>
             </div>
-            <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
+
+            <!-- 天氣 -->
+            <div class="panel">
+                <div class="wx-box">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img id="wx-icon-img" src="" alt="天氣圖示" style="width: 48px; height: 48px; display: none;" onerror="this.style.display='none'">
+                        <span class="wx-temp" id="current-temp">--°C</span>
+                    </div>
+                    <div style="text-align: right; font-size: 1rem; font-weight: 600;">
+                        <div>最高: <span id="wx-max" style="color: var(--accent-orange);">--°C</span></div>
+                        <div>最低: <span id="wx-min" style="color: var(--accent-blue);">--°C</span></div>
+                    </div>
+                </div>
+                <div id="weather-warning-box" class="warning-container" style="display: none;"></div>
+            </div>
+
+            <!-- 港鐵 -->
+            <div class="panel" style="flex: 1; overflow: hidden;">
+                <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-purple);">🚇 港鐵恆安站</div>
+                <div class="transit-container" id="mtr-eta-list" style="flex: 1;">
+                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入港鐵實時資料中...</div>
+                </div>
+            </div>
         </div>
 
-        <!-- 九巴 -->
-        <div class="panel">
-            <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-yellow);">🚌 九巴實時到站</div>
-            <div class="transit-input-box">
-                <input type="text" id="bus-route-input" class="transit-input" style="width: 65px; text-align: center;" placeholder="路線">
-                <input type="text" id="bus-stop-input" class="transit-input" style="width: 85px; text-align: center;" placeholder="站ID" value="003345">
-                <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
-                <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
+        <!-- 右欄：九巴、雲端備忘錄 -->
+        <div class="column">
+            <!-- 九巴 -->
+            <div class="panel" style="flex: 1.3; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-yellow);">🚌 九巴實時到站</div>
+                <div class="transit-input-box">
+                    <input type="text" id="bus-route-input" class="transit-input" style="width: 55px; text-align: center;" placeholder="路線">
+                    <input type="text" id="bus-stop-input" class="transit-input" style="width: 75px; text-align: center;" placeholder="站ID" value="003345">
+                    <input type="text" id="bus-name-input" class="transit-input" style="flex: 1;" placeholder="自訂名稱">
+                    <button class="transit-add-btn" onclick="addBusRoute()">新增</button>
+                </div>
+                <div class="transit-container" id="bus-eta-list" style="flex: 1; overflow-y: auto;">
+                    <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 0.95rem;">載入巴士資料中...</div>
+                </div>
             </div>
-            <div class="transit-container" id="bus-eta-list">
-                <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入巴士資料中...</div>
-            </div>
-        </div>
 
-        <!-- 港鐵 -->
-        <div class="panel">
-            <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-purple);">🚇 港鐵恆安站</div>
-            <div class="transit-container" id="mtr-eta-list">
-                <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1rem;">載入港鐵實時資料中...</div>
-            </div>
-        </div>
-
-        <!-- 雲端備忘錄 -->
-        <div class="panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 1.1rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
-                <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
-            </div>
-            <div class="memo-input-box">
-                <input type="text" id="memo-input" class="memo-input" placeholder="輸入備忘..." onkeypress="if(event.key==='Enter')addMemo()">
-                <button class="memo-btn" onclick="addMemo()">新增</button>
-            </div>
-            <div class="memo-list" id="memo-list">
-                <div style="color: #9ca3af; text-align: center; padding: 8px; font-size: 1rem;">正在連接雲端...</div>
+            <!-- 雲端備忘錄 -->
+            <div class="panel" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 1.05rem; font-weight: bold; color: var(--accent-green);">📝 雲端備忘錄</span>
+                    <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步</button>
+                </div>
+                <div class="memo-input-box">
+                    <input type="text" id="memo-input" class="memo-input" placeholder="輸入備忘..." onkeypress="if(event.key==='Enter')addMemo()">
+                    <button class="memo-btn" onclick="addMemo()">新增</button>
+                </div>
+                <div class="memo-list" id="memo-list" style="flex: 1;">
+                    <div style="color: #9ca3af; text-align: center; padding: 8px; font-size: 0.95rem;">正在連接雲端...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -358,7 +380,7 @@
 
         function renderMtrCell(t, defaultDestName, destMap) {
             if (!t) {
-                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; font-size: 0.9rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center;">暫無班次</div>`;
+                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 6px; font-size: 0.85rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center;">暫無班次</div>`;
             }
             const destName = destMap[t.dest] || t.dest || defaultDestName;
             const trainTime = new Date(t.time.replace(/-/g, '/'));
@@ -368,13 +390,13 @@
             const destColor = (t.dest === 'WKS') ? 'var(--accent-blue)' : 'var(--accent-purple)';
 
             return `
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(192,132,252,0.3); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div style="font-size: 0.85rem; color: #9ca3af;">
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(192,132,252,0.3); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="font-size: 0.8rem; color: #9ca3af;">
                         ${t.plat}台 <span style="color: ${destColor}; font-weight: bold;">${destName}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.5rem;">${timeText}</span>
-                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.3rem;">${clockTime}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px;">
+                        <span style="color: var(--accent-green); font-weight: 900; font-size: 1.4rem;">${timeText}</span>
+                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.2rem;">${clockTime}</span>
                     </div>
                 </div>
             `;
@@ -423,11 +445,11 @@
                 htmlContent += `
                     <div class="transit-card">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
                                 <span class="route-badge">${r.route}</span>
-                                ${r.name ? `<span style="font-size: 1rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
+                                ${r.name ? `<span style="font-size: 0.9rem; font-weight: bold; color: var(--accent-blue);">${r.name}</span>` : ''}
                             </div>
-                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.2rem;">✕</button>
+                            <button onclick="removeBusRoute(${i})" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:bold; font-size:1.1rem;">✕</button>
                         </div>
                         <div>${gridHtml}</div>
                     </div>
@@ -438,7 +460,7 @@
 
         function renderBusEtaCell(e, index) {
             if (!e) {
-                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; font-size: 0.9rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 54px;">暫無班次</div>`;
+                return `<div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 6px; font-size: 0.85rem; color: #6b7280; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 46px;">暫無班次</div>`;
             }
             const nextTime = new Date(e.eta);
             const diffMin = Math.round((nextTime - new Date()) / 60000);
@@ -453,14 +475,14 @@
             const tagClass = isSpecial ? 'pill-active-special' : 'pill-active-normal';
 
             return `
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #9ca3af;">
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; padding: 5px 6px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #9ca3af;">
                         <span>#${index}</span>
                         <span class="status-pill ${tagClass}">${tagText}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px;">
-                        <span style="color: ${timeColor}; font-weight: 900; font-size: 1.5rem;">${timeStr}</span>
-                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.3rem;">${clockTime}</span>
+                        <span style="color: ${timeColor}; font-weight: 900; font-size: 1.4rem;">${timeStr}</span>
+                        <span style="color: var(--accent-yellow); font-weight: 900; font-size: 1.2rem;">${clockTime}</span>
                     </div>
                 </div>
             `;
@@ -517,7 +539,7 @@
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
             if (memos.length === 0) {
-                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 8px; font-size: 1rem;">目前沒有備忘</div>';
+                listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 8px; font-size: 0.95rem;">目前沒有備忘</div>';
                 return;
             }
             listEl.innerHTML = memos.map((text, index) => `
