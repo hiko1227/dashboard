@@ -15,6 +15,7 @@
             --accent-purple: #c084fc;
             --accent-orange: #f59e0b;
             --accent-red: #f87171;
+            --accent-pink: #f472b6;
         }
 
         body.light-mode {
@@ -27,6 +28,7 @@
             --accent-purple: #7c3aed;
             --accent-orange: #d97706;
             --accent-red: #dc2626;
+            --accent-pink: #db2777;
         }
         
         body { 
@@ -46,7 +48,7 @@
             gap: 12px; 
             max-width: 1280px; 
             margin: auto; 
-        }
+        } 
         
         .panel { 
             background: var(--card-bg); 
@@ -117,6 +119,7 @@
         .memo-delete { color: var(--accent-red); background: none; border: none; font-weight: bold; cursor: pointer; font-size: 1.4rem; padding: 0 6px; }
         
         .refresh-memo-btn { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 8px; font-size: 1.05rem; cursor: pointer; }
+        .refresh-memo-btn:active { background: rgba(255, 255, 255, 0.25); }
 
         .transit-container { display: flex; flex-direction: column; gap: 10px; }
 
@@ -164,8 +167,20 @@
         .transit-add-btn { background: var(--accent-blue); color: #0b0f19; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; font-size: 1.15rem; cursor: pointer; white-space: nowrap; }
 
         .status-pill { font-size: 0.95rem; padding: 2px 6px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .pill-active-special { background: rgba(251, 191, 36, 0.3); color: var(--accent-yellow); border-color: rgba(251, 191, 36, 0.6); }
-        .pill-active-normal { background: rgba(52, 211, 153, 0.25); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.5); }
+        
+        /* 特別車：粉紅色 */
+        .pill-active-special { 
+            background: rgba(244, 114, 182, 0.25); 
+            color: var(--accent-pink); 
+            border-color: rgba(244, 114, 182, 0.6); 
+        }
+        
+        /* 普通車：綠色 */
+        .pill-active-normal { 
+            background: rgba(52, 211, 153, 0.25); 
+            color: var(--accent-green); 
+            border-color: rgba(52, 211, 153, 0.5); 
+        }
 
         @media (max-width: 850px) {
             .main-grid { grid-template-columns: 1fr; }
@@ -206,7 +221,6 @@
                         <div style="display: flex; align-items: baseline; gap: 8px;">
                             <span class="wx-temp" id="current-temp">--°C</span>
                         </div>
-                        <!-- 放大濕度與降雨概率字體 -->
                         <div style="font-size: 1.4rem; font-weight: bold; margin-top: 6px; display: flex; gap: 12px; align-items: center;">
                             <span style="color: var(--accent-blue);">濕度: <span id="current-humidity">--%</span></span>
                             <span style="color: rgba(255,255,255,0.3);">|</span>
@@ -227,7 +241,7 @@
             </div>
         </div>
 
-        <!-- 左下：港鐵恆安站 (4x1 橫排) + 雲端備忘錄 -->
+        <!-- 左下：港鐵恆安站 (4x1 橫排) + 備忘錄 (npoint.io) -->
         <div class="panel">
             <div class="transit-container" id="mtr-eta-list">
                 <div style="color: #9ca3af; text-align: center; padding: 10px; font-size: 1.1rem;">載入港鐵實時資料中...</div>
@@ -235,14 +249,14 @@
 
             <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                    <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 同步雲端</button>
+                    <button class="refresh-memo-btn" onclick="loadMemosFromCloud()">🔄 手動同步雲端</button>
                 </div>
                 <div class="memo-input-box">
                     <input type="text" id="memo-input" class="memo-input" placeholder="新增備忘事項..." onkeypress="if(event.key==='Enter')addMemo()">
                     <button class="memo-btn" onclick="addMemo()">新增</button>
                 </div>
                 <div class="memo-list" id="memo-list">
-                    <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1.2rem;">正在連接雲端...</div>
+                    <div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1.2rem;">正在讀取備忘...</div>
                 </div>
             </div>
         </div>
@@ -262,8 +276,8 @@
     </div>
 
     <script>
-        const BIN_ID = "6a87123ada38895dfefbc1ca"; 
-        const MASTER_KEY = "$2a$10$HvcOoQBCbmfplG2XSkexuOAFTbJfJzpuucJSOImKmhiM3K//7f5kO";
+        // npoint.io 設定
+        const NPOINT_URL = "https://api.npoint.io/6c4e46cd350165fe37c2";
 
         const hkHolidays = [
             { name: "中秋節翌日", date: "2026-09-28" },
@@ -439,7 +453,6 @@
             } catch (e) {}
         }
 
-        /* 放大港鐵倒數分鐘與時間 */
         function renderMtrCard4x1(t, destMap) {
             if (!t) {
                 return `
@@ -477,7 +490,6 @@
             ];
         }
 
-        /* 放大九巴倒數分鐘與時間 */
         async function fetchBusETA() {
             const container = document.getElementById('bus-eta-list');
             const routes = getStoredBusRoutes();
@@ -525,13 +537,27 @@
                             const clockTime = `${String(nextTime.getHours()).padStart(2, '0')}:${String(nextTime.getMinutes()).padStart(2, '0')}`;
 
                             const rmkText = e.rmk_tc ? e.rmk_tc.trim() : '';
-                            const isSpecial = (e.service_type > 1) || (rmkText !== '' && rmkText !== '原定班次' && rmkText.includes('特別'));
+                            
+                            // 判定特別車邏輯
+                            const isNormal = rmkText.includes('常規') || rmkText.includes('原定班次');
+                            const isSpecial = !isNormal && (
+                                (e.service_type > 1) || 
+                                rmkText.includes('下經') || 
+                                rmkText.includes('不經') || 
+                                rmkText.includes('特別') || 
+                                rmkText.includes('特快') || 
+                                rmkText.includes('改道') || 
+                                rmkText.includes('臨時')
+                            );
+
+                            const showRemark = rmkText && !rmkText.includes('原定班次') && !rmkText.includes('常規');
 
                             boxesHtml += `
                                 <div class="bus-card-box">
                                     <div style="font-size: 2.1rem; color: var(--accent-green); font-weight: 900;">${timeStr}</div>
                                     <div style="font-size: 1.3rem; color: var(--accent-yellow); font-weight: bold; margin: 2px 0;">${clockTime}</div>
                                     <span class="status-pill ${isSpecial ? 'pill-active-special' : 'pill-active-normal'}">${isSpecial ? '特別' : '普通'}</span>
+                                    ${showRemark ? `<div style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px; line-height: 1.1; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${rmkText}">${rmkText}</div>` : ''}
                                 </div>
                             `;
                         } else {
@@ -585,13 +611,14 @@
             fetchBusETA();
         }
 
+        // npoint.io 讀取備忘錄
         async function loadMemosFromCloud() {
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
+                const res = await fetch(NPOINT_URL);
                 const data = await res.json();
-                if (Array.isArray(data.record)) {
-                    renderMemos(data.record);
-                    localStorage.setItem('cached_memos', JSON.stringify(data.record));
+                if (Array.isArray(data)) {
+                    renderMemos(data);
+                    localStorage.setItem('cached_memos', JSON.stringify(data));
                 }
             } catch (e) {
                 const cached = localStorage.getItem('cached_memos');
@@ -599,12 +626,13 @@
             }
         }
 
+        // npoint.io 儲存備忘錄
         async function saveMemosToCloud(memos) {
             localStorage.setItem('cached_memos', JSON.stringify(memos));
             try {
-                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                    method: 'PUT',
-                    headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
+                await fetch(NPOINT_URL, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(memos)
                 });
             } catch (e) {}
@@ -612,7 +640,7 @@
 
         function renderMemos(memos) {
             const listEl = document.getElementById('memo-list');
-            if (memos.length === 0) {
+            if (!memos || memos.length === 0) {
                 listEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 6px; font-size: 1.2rem;">目前沒有備忘</div>';
                 return;
             }
@@ -662,7 +690,6 @@
 
         setInterval(updateTime, 1000);
         setInterval(fetchWeather, 600000); 
-        setInterval(loadMemosFromCloud, 30000); 
         setInterval(fetchMTR, 30000);
         setInterval(fetchBusETA, 30000);
 
