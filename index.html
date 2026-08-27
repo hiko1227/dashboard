@@ -104,6 +104,11 @@
             gap: 6px;
             animation: warningBlink 1.5s infinite ease-in-out;
         }
+        /* 天氣警告特別樣式 */
+        .badge-rain-yellow { background: rgba(251, 191, 36, 0.25); color: #fbbf24; border-color: #fbbf24; }
+        .badge-rain-red { background: rgba(239, 68, 68, 0.3); color: #ef4444; border-color: #ef4444; }
+        .badge-rain-black { background: rgba(0, 0, 0, 0.6); color: #ffffff; border-color: #ffffff; }
+        .badge-typhoon { background: rgba(147, 51, 234, 0.3); color: #c084fc; border-color: #c084fc; }
 
         /* 備忘錄 */
         .memo-input-box { display: flex; gap: 8px; margin-bottom: 8px; }
@@ -276,7 +281,6 @@
     </div>
 
     <script>
-        // npoint.io 設定
         const NPOINT_URL = "https://api.npoint.io/6c4e46cd350165fe37c2";
 
         const hkHolidays = [
@@ -410,11 +414,39 @@
                 if (res.ok) {
                     const data = await res.json();
                     let warningHtml = '';
+
                     for (const key in data) {
-                        if (data[key] && data[key].name) {
-                            warningHtml += `<span class="warning-badge">⚠️ ${data[key].name}</span>`;
+                        const item = data[key];
+                        if (item && item.name) {
+                            let customClass = '';
+                            let nameText = item.name;
+                            const code = item.code || '';
+
+                            // 暴雨警告判斷 (黃/紅/黑)
+                            if (code === 'WRAINY' || nameText.includes('黃色暴雨')) {
+                                nameText = '黃色暴雨警告';
+                                customClass = 'badge-rain-yellow';
+                            } else if (code === 'WRAINR' || nameText.includes('紅色暴雨')) {
+                                nameText = '紅色暴雨警告';
+                                customClass = 'badge-rain-red';
+                            } else if (code === 'WRAINB' || nameText.includes('黑色暴雨')) {
+                                nameText = '黑色暴雨警告';
+                                customClass = 'badge-rain-black';
+                            } 
+                            // 熱帶氣旋警告判斷 (風球號數)
+                            else if (code.startsWith('TC') || nameText.includes('熱帶氣旋')) {
+                                customClass = 'badge-typhoon';
+                                if (code === 'TC1' || nameText.includes('一號')) nameText = '1號戒備訊號';
+                                else if (code === 'TC3' || nameText.includes('三號')) nameText = '3號強風訊號';
+                                else if (code === 'TC8NE' || code === 'TC8SE' || code === 'TC8NW' || code === 'TC8SW' || nameText.includes('八號')) nameText = '8號烈風/暴風訊號';
+                                else if (code === 'TC9' || nameText.includes('九號')) nameText = '9號烈風/暴風增強訊號';
+                                else if (code === 'TC10' || nameText.includes('十號')) nameText = '10號颶風訊號';
+                            }
+
+                            warningHtml += `<span class="warning-badge ${customClass}">⚠️ ${nameText}</span>`;
                         }
                     }
+
                     warningBox.innerHTML = warningHtml;
                     warningBox.style.display = warningHtml ? 'flex' : 'none';
                 }
@@ -538,19 +570,14 @@
 
                             const rmkText = e.rmk_tc ? e.rmk_tc.trim() : '';
                             
-                            // 判定特別車邏輯
-                            const isNormal = rmkText.includes('常規') || rmkText.includes('原定班次');
-                            const isSpecial = !isNormal && (
-                                (e.service_type > 1) || 
-                                rmkText.includes('下經') || 
-                                rmkText.includes('不經') || 
-                                rmkText.includes('特別') || 
-                                rmkText.includes('特快') || 
-                                rmkText.includes('改道') || 
-                                rmkText.includes('臨時')
-                            );
+                            // 精準判定特別車邏輯
+                            // 1. 官方 service_type > 1 必定是特別班次
+                            // 2. 移除「常規」、「預定班次(常規)」、「原定班次」等純字眼
+                            // 3. 只要備註內含有非常規文字（如「不經」、「經」、「特別」、「特快」或路線異動），均判定為特別車
+                            const cleanRmk = rmkText.replace(/預定班次\(常規\)|預定班次|常規|原定班次/g, '').trim();
+                            const isSpecial = (e.service_type > 1) || (cleanRmk.length > 0);
 
-                            const showRemark = rmkText && !rmkText.includes('原定班次') && !rmkText.includes('常規');
+                            const showRemark = rmkText && !rmkText.includes('常規') && !rmkText.includes('原定班次');
 
                             boxesHtml += `
                                 <div class="bus-card-box">
@@ -686,19 +713,18 @@
 
         window.onload = function() {
             updateTime();
+            updateHolidayCountdown();
+            fetchWeather();
+            loadMemosFromCloud(); 
+            fetchMTR();
+            fetchBusETA();
         };
 
         setInterval(updateTime, 1000);
-        setInterval(fetchWeather, 600000); 
-        setInterval(fetchMTR, 30000);
-        setInterval(fetchBusETA, 30000);
-
-        updateTime(); 
-        updateHolidayCountdown();
-        fetchWeather();
-        loadMemosFromCloud(); 
-        fetchMTR();
-        fetchBusETA();
+        setInterval(fetchWeather, 300000); 
+        setInterval(fetchMTR, 15000);
+        setInterval(fetchBusETA, 20000);
+        setInterval(loadMemosFromCloud, 60000);
     </script>
 </body>
 </html>
