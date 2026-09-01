@@ -148,27 +148,61 @@
         .wx-box { display: flex; align-items: center; justify-content: space-between; }
         .wx-temp { font-size: 3.4rem; font-weight: 800; color: var(--accent-yellow); line-height: 1; }
 
-        @keyframes warningBlink {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.98); }
-            100% { opacity: 1; transform: scale(1); }
+        /* 🚨 天氣警告特殊標示與動態效果 */
+        @keyframes warningPulse {
+            0% { transform: scale(1); box-shadow: 0 0 4px rgba(248, 113, 113, 0.4); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(248, 113, 113, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 4px rgba(248, 113, 113, 0.4); }
         }
-        .warning-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+
+        @keyframes blackRainBlink {
+            0% { border-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
+            50% { border-color: #ffffff; box-shadow: 0 0 20px #ffffff; }
+            100% { border-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        }
+
+        .warning-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+        
+        /* 通用警告 */
         .warning-badge {
             background: rgba(248, 113, 113, 0.15);
             color: var(--accent-red);
             border: 1px solid var(--accent-red);
             padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 1.15rem;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            animation: warningBlink 1.5s infinite ease-in-out;
+            animation: warningPulse 1.8s infinite ease-in-out;
         }
 
-        /* 備忘錄（放大版） */
+        /* 黄雨 / 1號戒備信號 */
+        .warning-yellow {
+            background: rgba(251, 191, 36, 0.2) !important;
+            color: #f59e0b !important;
+            border: 2px solid #f59e0b !important;
+        }
+
+        /* 紅雨 / 3號強風信號 */
+        .warning-red {
+            background: rgba(239, 68, 68, 0.25) !important;
+            color: #ef4444 !important;
+            border: 2px solid #ef4444 !important;
+            font-size: 1.25rem !important;
+        }
+
+        /* 黑雨 / 8號或以上烈風/暴風/颶風信號 */
+        .warning-black {
+            background: #111827 !important;
+            color: #f87171 !important;
+            border: 2px solid #ef4444 !important;
+            font-size: 1.3rem !important;
+            animation: blackRainBlink 1s infinite ease-in-out !important;
+        }
+
+        /* 備忘錄 */
         .memo-section-title {
             font-size: 1.3rem;
             font-weight: 800;
@@ -243,13 +277,8 @@
             min-height: 130px;
         }
 
-        .memo-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .memo-list::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 6px;
-        }
+        .memo-list::-webkit-scrollbar { width: 6px; }
+        .memo-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 6px; }
 
         @media (max-width: 850px) { .main-grid { grid-template-columns: 1fr; } }
     </style>
@@ -316,7 +345,7 @@
             </div>
         </div>
 
-        <!-- 左下：港鐵恆安站（大卡片模式） -->
+        <!-- 左下：港鐵恆安站 -->
         <div class="panel">
             <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-blue); margin-bottom: 4px;">
                 🚆 港鐵恆安站 實時班次
@@ -345,7 +374,6 @@
     <script>
         const NPOINT_URL = "https://api.npoint.io/6c4e46cd350165fe37c2";
 
-        // 🛠️ 專為 .jpeg 檔案優化之智能圖片載入器 (依次嘗試 .jpeg -> .jpg -> .png -> .webp)
         function loadSmartImage(imgElement, baseName) {
             const extensions = ['.jpeg', '.jpg', '.png', '.webp', '.JPEG', '.JPG', '.PNG'];
             let extIndex = 0;
@@ -537,24 +565,69 @@
 
         async function fetchWeatherWarnings() {
             const warningBox = document.getElementById('weather-warning-box');
+            
+            // 💡 測試模式：若想在沒有颱風時測試畫面，可將下面整段 testSignal 解除註釋（改為 true）
+            /* 
+            const testSignal = [{ name: '八號東北烈風或暴風信號' }, { name: '黑色暴雨警告信號' }];
+            renderWarnings(testSignal);
+            return;
+            */
+
             try {
                 const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc');
                 if (res.ok) {
                     const data = await res.json();
-                    let warningHtml = '';
+                    let warningList = [];
 
+                    // 遍歷 API 回傳的所有警告
                     for (const key in data) {
                         const item = data[key];
                         if (item && item.name) {
-                            let nameText = item.name;
-                            warningHtml += `<span class="warning-badge">⚠️ ${nameText}</span>`;
+                            warningList.push(item);
+                        } else if (item && typeof item === 'object') {
+                            // 應付部分巢狀結構（如 WTyphoon 內的詳細資料）
+                            if (item.code) {
+                                warningList.push({ name: item.name || item.code });
+                            }
                         }
                     }
 
-                    warningBox.innerHTML = warningHtml;
-                    warningBox.style.display = warningHtml ? 'flex' : 'none';
+                    renderWarnings(warningList);
                 }
             } catch (err) { warningBox.style.display = 'none'; }
+        }
+
+        function renderWarnings(warningList) {
+            const warningBox = document.getElementById('weather-warning-box');
+            if (!warningList || warningList.length === 0) {
+                warningBox.style.display = 'none';
+                return;
+            }
+
+            let warningHtml = '';
+            warningList.forEach(item => {
+                let nameText = item.name || '';
+                let styleClass = '';
+
+                // 🌀 熱帶氣旋與雨量警告全方位精準比對
+                if (nameText.includes('一號') || nameText.includes('1號') || nameText.includes('戒備') || nameText.includes('黃色暴雨')) {
+                    styleClass = 'warning-yellow';
+                } else if (nameText.includes('三號') || nameText.includes('3號') || nameText.includes('強風') || nameText.includes('紅色暴雨')) {
+                    styleClass = 'warning-red';
+                } else if (nameText.includes('八號') || nameText.includes('8號') || nameText.includes('九號') || nameText.includes('9號') || nameText.includes('十號') || nameText.includes('10號') || nameText.includes('烈風') || nameText.includes('暴風') || nameText.includes('颶風') || nameText.includes('黑色暴雨')) {
+                    styleClass = 'warning-black';
+                }
+
+                // 自動補上圖示
+                let icon = '⚠️';
+                if (nameText.includes('信號') || nameText.includes('風球') || nameText.includes('戒備') || nameText.includes('強風') || nameText.includes('烈風')) icon = '🌀';
+                if (nameText.includes('暴雨')) icon = '🌧️';
+
+                warningHtml += `<span class="warning-badge ${styleClass}">${icon} ${nameText}</span>`;
+            });
+
+            warningBox.innerHTML = warningHtml;
+            warningBox.style.display = warningHtml ? 'flex' : 'none';
         }
 
         async function fetchMTR() {
