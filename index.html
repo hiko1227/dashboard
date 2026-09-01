@@ -564,71 +564,98 @@
         }
 
         async function fetchWeatherWarnings() {
-            const warningBox = document.getElementById('weather-warning-box');
+    const warningBox = document.getElementById('weather-warning-box');
+    
+    try {
+        let warningList = [];
+
+        // 1. 先抓取 Warning Summary (warnsum)
+        const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc');
+        if (res.ok) {
+            const data = await res.json();
             
-            // 💡 測試模式：若想在沒有颱風時測試畫面，可將下面整段 testSignal 解除註釋（改為 true）
-            /* 
-            const testSignal = [{ name: '八號東北烈風或暴風信號' }, { name: '黑色暴雨警告信號' }];
-            renderWarnings(testSignal);
-            return;
-            */
-
-            try {
-                const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc');
-                if (res.ok) {
-                    const data = await res.json();
-                    let warningList = [];
-
-                    // 遍歷 API 回傳的所有警告
-                    for (const key in data) {
-                        const item = data[key];
-                        if (item && item.name) {
-                            warningList.push(item);
-                        } else if (item && typeof item === 'object') {
-                            // 應付部分巢狀結構（如 WTyphoon 內的詳細資料）
-                            if (item.code) {
-                                warningList.push({ name: item.name || item.code });
-                            }
-                        }
-                    }
-
-                    renderWarnings(warningList);
-                }
-            } catch (err) { warningBox.style.display = 'none'; }
-        }
-
-        function renderWarnings(warningList) {
-            const warningBox = document.getElementById('weather-warning-box');
-            if (!warningList || warningList.length === 0) {
-                warningBox.style.display = 'none';
-                return;
+            // 處理熱帶氣旋專屬結構 WTyphoon
+            if (data.WTyphoon) {
+                warningList.push({
+                    code: data.WTyphoon.code,
+                    name: data.WTyphoon.name || '熱帶氣旋警告信號',
+                    type: 'WTyphoon'
+                });
             }
 
-            let warningHtml = '';
-            warningList.forEach(item => {
-                let nameText = item.name || '';
-                let styleClass = '';
-
-                // 🌀 熱帶氣旋與雨量警告全方位精準比對
-                if (nameText.includes('一號') || nameText.includes('1號') || nameText.includes('戒備') || nameText.includes('黃色暴雨')) {
-                    styleClass = 'warning-yellow';
-                } else if (nameText.includes('三號') || nameText.includes('3號') || nameText.includes('強風') || nameText.includes('紅色暴雨')) {
-                    styleClass = 'warning-red';
-                } else if (nameText.includes('八號') || nameText.includes('8號') || nameText.includes('九號') || nameText.includes('9號') || nameText.includes('十號') || nameText.includes('10號') || nameText.includes('烈風') || nameText.includes('暴風') || nameText.includes('颶風') || nameText.includes('黑色暴雨')) {
-                    styleClass = 'warning-black';
+            // 處理其他一般警告
+            for (const key in data) {
+                if (key !== 'WTyphoon' && data[key] && typeof data[key] === 'object') {
+                    const item = data[key];
+                    if (item.name || item.code) {
+                        warningList.push(item);
+                    }
                 }
-
-                // 自動補上圖示
-                let icon = '⚠️';
-                if (nameText.includes('信號') || nameText.includes('風球') || nameText.includes('戒備') || nameText.includes('強風') || nameText.includes('烈風')) icon = '🌀';
-                if (nameText.includes('暴雨')) icon = '🌧️';
-
-                warningHtml += `<span class="warning-badge ${styleClass}">${icon} ${nameText}</span>`;
-            });
-
-            warningBox.innerHTML = warningHtml;
-            warningBox.style.display = warningHtml ? 'flex' : 'none';
+            }
         }
+
+        // 2. 若 warnsum 未抓到，備用讀取 Detailed Warning Info (warningInfo)
+        if (warningList.length === 0) {
+            const infoRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warningInfo&lang=tc');
+            if (infoRes.ok) {
+                const infoData = await infoRes.json();
+                if (infoData.warningStatementCode) {
+                    warningList.push({
+                        code: infoData.warningStatementCode,
+                        name: infoData.contents ? infoData.contents[0] : '天氣警告',
+                        type: 'statement'
+                    });
+                }
+            }
+        }
+
+        renderWarnings(warningList);
+    } catch (err) { 
+        warningBox.style.display = 'none'; 
+    }
+}
+
+function renderWarnings(warningList) {
+    const warningBox = document.getElementById('weather-warning-box');
+    if (!warningList || warningList.length === 0) {
+        warningBox.style.display = 'none';
+        return;
+    }
+
+    let warningHtml = '';
+    warningList.forEach(item => {
+        let code = (item.code || '').toUpperCase();
+        let nameText = item.name || '';
+        let styleClass = '';
+        let displayName = nameText;
+
+        // 🌀 精準依據 HKO Code 或名稱比對風球與雨量信號
+        if (code === 'TC1' || nameText.includes('一號') || nameText.includes('1號') || nameText.includes('戒備') || nameText.includes('黃色暴雨')) {
+            styleClass = 'warning-yellow';
+            if (code === 'TC1' && !nameText.includes('一號')) displayName = '一號戒備信號';
+        } 
+        else if (code === 'TC3' || nameText.includes('三號') || nameText.includes('3號') || nameText.includes('強風') || nameText.includes('紅色暴雨')) {
+            styleClass = 'warning-red';
+            if (code === 'TC3' && !nameText.includes('三號')) displayName = '三號強風信號';
+        } 
+        else if (code.startsWith('TC8') || code === 'TC9' || code === 'TC10' || nameText.includes('八號') || nameText.includes('九號') || nameText.includes('十號') || nameText.includes('黑色暴雨')) {
+            styleClass = 'warning-black';
+            if (code.startsWith('TC8') && !nameText.includes('八號')) displayName = '八號烈風或暴風信號';
+            if (code === 'TC9') displayName = '九號烈風或暴風風力增強信號';
+            if (code === 'TC10') displayName = '十號颶風信號';
+        }
+
+        // 自動繪製圖示
+        let icon = '⚠️';
+        if (code.startsWith('TC') || displayName.includes('信號') || displayName.includes('風球') || displayName.includes('戒備')) icon = '🌀';
+        if (displayName.includes('暴雨')) icon = '🌧️';
+
+        warningHtml += `<span class="warning-badge ${styleClass}">${icon} ${displayName}</span>`;
+    });
+
+    warningBox.innerHTML = warningHtml;
+    warningBox.style.display = warningHtml ? 'flex' : 'none';
+}
 
         async function fetchMTR() {
             const container = document.getElementById('mtr-eta-list');
